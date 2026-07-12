@@ -38,23 +38,21 @@
           "type": "NumberSpinner",
           "name": "UnitID",
           "caption": "Unit-ID",
+          "width": "220px",
           "minimum": 0,
           "maximum": 255
         },
         {
           "type": "CheckBox",
           "name": "CheckUnitID",
-          "caption": "Anfragen an fremde Unit-IDs ablehnen"
-        }
-      ]
-    },
-    {
-      "type": "RowLayout",
-      "items": [
+          "caption": "Anfragen an fremde Unit-IDs ablehnen",
+          "width": "400px"
+        },
         {
           "type": "CheckBox",
           "name": "SwapWords",
-          "caption": "Low-Word zuerst (CDAB)"
+          "caption": "Low-Word zuerst (CDAB)",
+          "width": "340px"
         },
         {
           "type": "Select",
@@ -161,7 +159,7 @@
         "items": [
           {
             "type": "Label",
-            "caption": "Die Vorlage ersetzt den Inhalt der Registertabelle in der offenen Konfiguration und setzt die passende Word-Order. Gespeichert wird erst mit 'Änderungen übernehmen'."
+            "caption": "Die Vorlage ersetzt den Inhalt der Registertabelle in der offenen Konfiguration und setzt die passende Word-Order. Die RPC-Vorlage aktiviert zusätzlich die RPC-Schnittstelle (Register 5000/5006/5008 mit Watchdog-Logik) und blendet deren Einstellungs-Panel ein. Gespeichert wird erst mit 'Änderungen übernehmen'."
           },
           {
             "type": "Select",
@@ -184,6 +182,7 @@
     },
     {
       "type": "ExpansionPanel",
+      "name": "RPCPanel",
       "caption": "⚡ Meteocontrol RPC / Direktvermarktung",
       "expanded": false,
       "items": [

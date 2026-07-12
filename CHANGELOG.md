@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1 (2026-07-12)
+
+- RPC-Aktivierung ins Vorlagen-Popup integriert: Die RPC-Vorlage aktiviert die Schnittstelle und blendet das Einstellungs-Panel "Meteocontrol RPC / Direktvermarktung" ein - solange RPC nicht aktiviert ist, wird das Panel gar nicht angezeigt
+- Kopfzeile wieder einzeilig, nutzt jetzt die volle Formularbreite mit größeren Abständen zwischen den Feldern
+
 ## 1.2.0 (2026-07-12)
 
 - Neu: SunSpec-Vorlage (Common Model 1 + Wechselrichter Model 113, float32, Basis 40000)

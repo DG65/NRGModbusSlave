@@ -76,6 +76,8 @@ Emuliert die **Remote-Power-Control-(RPC-)Schnittstelle** des Meteocontrol blue'
 - **Register 5008** (float32, RW): Watchdog – verlängert eine laufende Vorgabe
 - **Istwert-Register** 0–14 (float32), 100–114 (int32) und 4000 (P_AV) über die Registertabelle
 
+Aktiviert wird die RPC-Schnittstelle über die Vorlage im Popup „Vorlage laden…" – erst dann
+erscheint auch das Einstellungs-Panel (Rückfall-Sollwert, Gültigkeitsdauer, Ereignis-Skript).
 Die Steuer-Register 5000/5002–5005/5006/5008 verwaltet das Modul **intern** – sie erscheinen
 nicht in der Registertabelle. Die Vorlage lädt die zugehörigen Istwert-Register.
 

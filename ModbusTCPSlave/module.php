@@ -187,7 +187,10 @@ class ModbusTCPSlave extends IPSModule
     public function GetConfigurationForm()
     {
         $form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
-        $this->setFormVisibility($form['elements'], self::RPC_FORM_FIELDS, $this->ReadPropertyBoolean('RPCEnabled'));
+        $enabled = $this->ReadPropertyBoolean('RPCEnabled');
+        // Das komplette RPC-Panel erscheint erst, wenn die RPC-Schnittstelle
+        // (über die Vorlage im Popup) aktiviert wurde
+        $this->setFormVisibility($form['elements'], array_merge(['RPCPanel'], self::RPC_FORM_FIELDS), $enabled);
         return json_encode($form);
     }
 
@@ -218,11 +221,13 @@ class ModbusTCPSlave extends IPSModule
                 $this->UpdateFormField('CheckUnitID', 'value', true);
                 $this->UpdateFormField('SwapWords', 'value', true);
                 $this->UpdateFormField('RPCEnabled', 'value', true);
+                $this->UpdateFormField('RPCPanel', 'visible', true);
+                $this->UpdateFormField('RPCPanel', 'expanded', true);
                 $this->UIToggleRPC(true);
                 if ($effective > 0) {
-                    echo "Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt). Bitte die Istwert-Variablen (WR-Leistung, Netzleistung, P_AV) zuordnen und mit 'Änderungen übernehmen' speichern.";
+                    echo "Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt, RPC-Schnittstelle aktiviert - Einstellungen siehe eingeblendetes Panel). Bitte die Istwert-Variablen (WR-Leistung, Netzleistung, P_AV) zuordnen und mit 'Änderungen übernehmen' speichern.";
                 } else {
-                    echo "Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt). Nach 'Änderungen übernehmen' die Vorlage erneut laden, damit die Sollwert-Register (4/8/104/108) automatisch mit der Variable 'Wirksamer DV-Sollwert' verknüpft werden. Istwert-Variablen bitte manuell zuordnen.";
+                    echo "Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt, RPC-Schnittstelle aktiviert - Einstellungen siehe eingeblendetes Panel). Nach 'Änderungen übernehmen' die Vorlage erneut laden, damit die Sollwert-Register (4/8/104/108) automatisch mit der Variable 'Wirksamer DV-Sollwert' verknüpft werden. Istwert-Variablen bitte manuell zuordnen.";
                 }
                 return;
 
