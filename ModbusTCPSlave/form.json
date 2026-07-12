@@ -152,9 +152,12 @@
       ]
     },
     {
-      "type": "PopupButton",
-      "caption": "Vorlage laden...",
-      "popup": {
+      "type": "RowLayout",
+      "items": [
+        {
+          "type": "PopupButton",
+          "caption": "Vorlage laden...",
+          "popup": {
         "caption": "Registervorlage laden",
         "items": [
           {
@@ -178,7 +181,14 @@
             "onClick": "MBSLV_LoadTemplate($id, $TemplateSelect);"
           }
         ]
-      }
+          }
+        },
+        {
+          "type": "Button",
+          "caption": "Datenpunkte für unzugeordnete Register anlegen",
+          "onClick": "MBSLV_CreateRowVariables($id, json_encode($Registers));"
+        }
+      ]
     },
     {
       "type": "ExpansionPanel",

@@ -250,6 +250,63 @@ class ModbusTCPSlave extends IPSModule
     }
 
     /**
+     * Formular-Button: legt für alle Zeilen der (offenen) Registertabelle ohne
+     * zugeordnete Variable einen Datenpunkt unter der Instanz an und trägt ihn
+     * in die Tabelle ein. Zeilen mit Festwert ungleich 0 (Header/Konstanten,
+     * z. B. SunSpec-Modell-IDs) bleiben unangetastet. Wiederholtes Ausführen
+     * ist unschädlich - vorhandene Datenpunkte werden wiederverwendet.
+     */
+    public function CreateRowVariables(string $RowsJson): void
+    {
+        $rows = json_decode($RowsJson, true);
+        if (is_string($rows)) { // doppelt kodiert angeliefert
+            $rows = json_decode($rows, true);
+        }
+        if (!is_array($rows) || $rows === []) {
+            echo 'Die Registertabelle ist leer - zuerst Zeilen anlegen oder eine Vorlage laden.';
+            return;
+        }
+
+        $created = 0;
+        $reused = 0;
+        $skipped = 0;
+        foreach ($rows as &$row) {
+            $variable = (int) ($row['VariableID'] ?? 0);
+            if ($variable >= 10000 && IPS_VariableExists($variable)) {
+                continue; // bereits zugeordnet
+            }
+            if ((float) ($row['Fixed'] ?? 0.0) != 0.0) {
+                $skipped++;
+                continue;
+            }
+            $address = (int) ($row['Address'] ?? 0);
+            $ident = sprintf('Reg_%d_%d', (int) ($row['Area'] ?? 0), $address);
+            $name = trim((string) ($row['Name'] ?? ''));
+            if ($name === '') {
+                $name = 'Register ' . $address;
+            }
+            $existed = @$this->GetIDForIdent($ident) > 0;
+            if (in_array((string) ($row['DataType'] ?? 'uint16'), ['float32', 'float64'], true)) {
+                $id = $this->RegisterVariableFloat($ident, $name, '', 1000 + $address);
+            } else {
+                $id = $this->RegisterVariableInteger($ident, $name, '', 1000 + $address);
+            }
+            $row['VariableID'] = $id;
+            $existed ? $reused++ : $created++;
+        }
+        unset($row);
+
+        $this->UpdateFormField('Registers', 'values', json_encode($rows));
+
+        $message = sprintf('%d Datenpunkt(e) angelegt, %d wiederverwendet und in die Tabelle eingetragen.', $created, $reused);
+        if ($skipped > 0) {
+            $message .= sprintf(' %d Zeile(n) mit Festwert wurden übersprungen.', $skipped);
+        }
+        $message .= " Mit 'Änderungen übernehmen' speichern. Die Datenpunkte gehören zur Instanz und können per Ereignis/Skript aus beliebigen Quellen befüllt werden.";
+        echo $message;
+    }
+
+    /**
      * Formular-Button: legt für jeden angegebenen Port eine Kopie dieser
      * Instanz samt Server Socket an (z. B. "502-505" oder "502,503").
      * Ports, auf denen bereits eine ModbusTCPSlave-Instanz lauscht (inklusive

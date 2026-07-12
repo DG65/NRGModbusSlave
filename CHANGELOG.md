@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0 (2026-07-12)
+
+- Neu: Button "Datenpunkte für unzugeordnete Register anlegen" - legt für alle Tabellenzeilen ohne zugeordnete Variable einen Datenpunkt unter der Instanz an (float für float32/64, sonst integer) und trägt ihn direkt in die Tabelle ein. Zeilen mit Festwert (Header/Konstanten, z. B. SunSpec-Modell-IDs) bleiben unangetastet; wiederholtes Ausführen verwendet vorhandene Datenpunkte wieder
+
 ## 1.2.1 (2026-07-12)
 
 - RPC-Aktivierung ins Vorlagen-Popup integriert: Die RPC-Vorlage aktiviert die Schnittstelle und blendet das Einstellungs-Panel "Meteocontrol RPC / Direktvermarktung" ein - solange RPC nicht aktiviert ist, wird das Panel gar nicht angezeigt

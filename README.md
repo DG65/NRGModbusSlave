@@ -65,6 +65,13 @@ Tabelle übernehmen (inklusive passender Word-Order); gespeichert wird erst mit 
 
 Weitere Vorlagen sind nach demselben Muster ergänzbar.
 
+**Datenpunkte anlegen:** Das Modul legt von sich aus keine Variablen für Tabellenzeilen an –
+die Tabelle verweist normalerweise auf bestehende Variablen. Der Button **„Datenpunkte für
+unzugeordnete Register anlegen"** erzeugt bei Bedarf für alle Zeilen ohne Variable einen
+Datenpunkt unter der Instanz und trägt ihn in die Tabelle ein (Zeilen mit Festwert bleiben
+unangetastet). Diese Datenpunkte können dann per Ereignis/Skript aus beliebigen Quellen
+befüllt werden – praktisch für Emulationen wie die SunSpec-Vorlage.
+
 #### Meteocontrol blue'Log RPC (Direktvermarktung)
 
 Emuliert die **Remote-Power-Control-(RPC-)Schnittstelle** des Meteocontrol blue'Log XM/XC
