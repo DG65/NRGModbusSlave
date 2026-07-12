@@ -47,10 +47,23 @@ Schreibbar-Flag. Beim Schreiben wird `RequestAction` verwendet, wenn die Zielvar
 Aktion besitzt, sonst `SetValue`. Dieselbe Variable darf mehrfach gemappt werden (z. B. float32-
 und int32-Darstellung parallel).
 
+**Unbelegte Register:** Fragt ein Master eine Adresse ohne Tabellenzeile an, liefert das Modul
+wahlweise 0 (tolerant, Standard – sinnvoll, wenn Master ganze Blöcke lesen) oder eine
+Modbus-Exception „Illegal Data Address" (strikt).
+
 ### Vorlagen
 
-Vorbereitete Registerbelegungen lassen sich per Button ins Formular laden; gespeichert wird
-erst mit „Änderungen übernehmen". Weitere Vorlagen sind nach demselben Muster ergänzbar.
+Vorbereitete Registerbelegungen lassen sich über den Popup-Button „Vorlage laden…" in die
+Tabelle übernehmen (inklusive passender Word-Order); gespeichert wird erst mit „Änderungen
+übernehmen". Aktuell enthalten:
+
+- **Meteocontrol blue'Log RPC** (Direktvermarktung, siehe unten)
+- **SunSpec Wechselrichter dreiphasig** (Common Model 1 + Model 113, float32, Basis 40000) –
+  emuliert einen SunSpec-konformen WR für Logger/Parkregler; die float-Modelle kommen ohne
+  Skalierungsfaktoren aus. Die Textfelder des Common Models (Hersteller/Seriennummer) liefern 0,
+  Strings unterstützt das Modul nicht.
+
+Weitere Vorlagen sind nach demselben Muster ergänzbar.
 
 #### Meteocontrol blue'Log RPC (Direktvermarktung)
 
@@ -62,6 +75,9 @@ Emuliert die **Remote-Power-Control-(RPC-)Schnittstelle** des Meteocontrol blue'
 - **Register 5006** (float32, RW): Gültigkeitsdauer der Vorgabe in Minuten (1–255, Default 10)
 - **Register 5008** (float32, RW): Watchdog – verlängert eine laufende Vorgabe
 - **Istwert-Register** 0–14 (float32), 100–114 (int32) und 4000 (P_AV) über die Registertabelle
+
+Die Steuer-Register 5000/5002–5005/5006/5008 verwaltet das Modul **intern** – sie erscheinen
+nicht in der Registertabelle. Die Vorlage lädt die zugehörigen Istwert-Register.
 
 **Ablauf-Logik gemäß Datenblatt:** Eine geschriebene Sollwertvorgabe gilt für die
 Gültigkeitsdauer; jede weitere Vorgabe oder ein Watchdog-Schreiben startet den Ablauf-Timer

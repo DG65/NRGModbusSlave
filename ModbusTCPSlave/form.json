@@ -7,7 +7,7 @@
       "items": [
         {
           "type": "Label",
-          "caption": "Dieses Modul macht IP-Symcon zum Modbus-TCP-Slave (Server): externe Modbus-Master lesen und schreiben IPS-Variablen über die unten definierte Registertabelle. Der TCP-Port wird auf der übergeordneten Server-Socket-Instanz eingestellt (Standard 502)."
+          "caption": "Dieses Modul macht IP-Symcon zum Modbus-TCP-Slave (Server): externe Modbus-Master lesen und schreiben IPS-Variablen über die unten definierte Registertabelle. Der TCP-Port wird auf der übergeordneten Server-Socket-Instanz eingestellt (üblich 502). Mehrere gleichzeitige Verbindungen auf demselben Port sind möglich."
         },
         {
           "type": "Label",
@@ -15,11 +15,19 @@
         },
         {
           "type": "Label",
+          "caption": "Unbelegte Register: Fragt ein Master eine Adresse an, zu der keine Tabellenzeile existiert, liefert das Modul je nach Einstellung entweder den Wert 0 (tolerant, Standard - sinnvoll wenn Master ganze Blöcke lesen) oder eine Modbus-Exception 'Illegal Data Address' (strikt - Fehler werden sofort sichtbar)."
+        },
+        {
+          "type": "Label",
           "caption": "Word-Reihenfolge: Modbus überträgt jedes 16-Bit-Register Big-Endian. Bei Mehrwort-Werten bestimmt die Option 'Low-Word zuerst' die Word-Reihenfolge (eingeschaltet = CDAB, z. B. Meteocontrol; ausgeschaltet = ABCD, z. B. SunSpec). Was die Gegenstelle erwartet, steht in deren Registerdokumentation."
         },
         {
           "type": "Label",
-          "caption": "Vorlagen: Über Buttons lassen sich vorbereitete Registerbelegungen in die Tabelle laden (aktuell: Meteocontrol blue'Log RPC für die Direktvermarktung - der Master schreibt die Wirkleistungsvorgabe in Register 5000, die Gültigkeitsdauer in 5006 und verlängert per Watchdog-Register 5008; nach Ablauf fällt der 'Wirksame DV-Sollwert' auf den Rückfall-Sollwert zurück). Gespeichert wird erst mit 'Änderungen übernehmen'."
+          "caption": "Vorlagen: Der Button 'Vorlage laden' füllt die Registertabelle mit einer vorbereiteten Belegung (Meteocontrol blue'Log RPC oder SunSpec-Wechselrichter) und setzt die passende Word-Order. Gespeichert wird erst mit 'Änderungen übernehmen'."
+        },
+        {
+          "type": "Label",
+          "caption": "Meteocontrol RPC (Direktvermarktung): Die Steuer-Register 5000 (Sollwert), 5002-5005 (Reserve), 5006 (Gültigkeitsdauer) und 5008 (Watchdog) verwaltet das Modul intern - sie erscheinen NICHT in der Registertabelle. Die Vorlage lädt die zugehörigen Istwert-Register (0-14, 100-114, 4000). Nach Ablauf der Gültigkeitsdauer fällt der 'Wirksame DV-Sollwert' auf den Rückfall-Sollwert zurück."
         }
       ]
     },
@@ -36,8 +44,13 @@
         {
           "type": "CheckBox",
           "name": "CheckUnitID",
-          "caption": "Unit-ID prüfen"
-        },
+          "caption": "Anfragen an fremde Unit-IDs ablehnen"
+        }
+      ]
+    },
+    {
+      "type": "RowLayout",
+      "items": [
         {
           "type": "CheckBox",
           "name": "SwapWords",
@@ -46,13 +59,17 @@
         {
           "type": "Select",
           "name": "UnmappedRead",
-          "caption": "Lesen unbelegter Register",
+          "caption": "Antwort beim Lesen unbelegter Register",
           "options": [
-            { "caption": "0 liefern", "value": 0 },
-            { "caption": "Exception (Illegal Data Address)", "value": 1 }
+            { "caption": "0 liefern (tolerant, Standard)", "value": 0 },
+            { "caption": "Modbus-Exception 'Illegal Data Address'", "value": 1 }
           ]
         }
       ]
+    },
+    {
+      "type": "Label",
+      "caption": " "
     },
     {
       "type": "List",
@@ -137,17 +154,53 @@
       ]
     },
     {
+      "type": "PopupButton",
+      "caption": "Vorlage laden...",
+      "popup": {
+        "caption": "Registervorlage laden",
+        "items": [
+          {
+            "type": "Label",
+            "caption": "Die Vorlage ersetzt den Inhalt der Registertabelle in der offenen Konfiguration und setzt die passende Word-Order. Gespeichert wird erst mit 'Änderungen übernehmen'."
+          },
+          {
+            "type": "Select",
+            "name": "TemplateSelect",
+            "caption": "Vorlage",
+            "value": "rpc",
+            "options": [
+              { "caption": "Meteocontrol blue'Log RPC (Direktvermarktung)", "value": "rpc" },
+              { "caption": "SunSpec Wechselrichter dreiphasig (Model 1 + 113, float)", "value": "sunspec113" }
+            ]
+          }
+        ],
+        "buttons": [
+          {
+            "caption": "In Tabelle laden",
+            "onClick": "MBSLV_LoadTemplate($id, $TemplateSelect);"
+          }
+        ]
+      }
+    },
+    {
       "type": "ExpansionPanel",
-      "caption": "⚡ Vorlage: Meteocontrol RPC / Direktvermarktung",
+      "caption": "⚡ Meteocontrol RPC / Direktvermarktung",
       "expanded": false,
       "items": [
         {
           "type": "CheckBox",
           "name": "RPCEnabled",
-          "caption": "RPC-Schnittstelle (Register 5000/5006/5008) aktivieren"
+          "caption": "RPC-Schnittstelle (Register 5000/5006/5008) aktivieren",
+          "onChange": "MBSLV_UIToggleRPC($id, $RPCEnabled);"
+        },
+        {
+          "type": "Label",
+          "name": "RPCHintInternal",
+          "caption": "Die Steuer-Register 5000 (Sollwert), 5002-5005, 5006 (Gültigkeitsdauer) und 5008 (Watchdog) verwaltet das Modul intern - sie erscheinen nicht in der Registertabelle. Die zugehörigen Istwert-Register lädt die Vorlage 'Meteocontrol blue'Log RPC'."
         },
         {
           "type": "RowLayout",
+          "name": "RPCSettingsRow",
           "items": [
             {
               "type": "NumberSpinner",
@@ -176,12 +229,8 @@
         },
         {
           "type": "Label",
+          "name": "RPCHintScript",
           "caption": "Das Skript erhält $_IPS['Action'] (setpoint | watchdog | expired), $_IPS['Setpoint'], $_IPS['Valid'] und $_IPS['InstanceID']. Alternativ einfach ein Ereignis auf die Variable 'Wirksamer DV-Sollwert' legen."
-        },
-        {
-          "type": "Button",
-          "caption": "blue'Log-RPC-Registervorlage laden",
-          "onClick": "MBSLV_LoadRPCProfile($id);"
         }
       ]
     }

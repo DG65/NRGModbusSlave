@@ -181,57 +181,67 @@ class ModbusTCPSlave extends IPSModule
     }
 
     /**
-     * Formular-Button: lädt die blue'Log-RPC-Registervorlage in die offene
-     * Konfiguration (nur UpdateFormField - gespeichert wird erst durch den
-     * Nutzer über "Änderungen übernehmen").
+     * Dynamisches Formular: RPC-Einstellungen nur zeigen, wenn die
+     * RPC-Schnittstelle aktiviert ist (Live-Umschaltung via UIToggleRPC).
      */
+    public function GetConfigurationForm()
+    {
+        $form = json_decode(file_get_contents(__DIR__ . '/form.json'), true);
+        $this->setFormVisibility($form['elements'], self::RPC_FORM_FIELDS, $this->ReadPropertyBoolean('RPCEnabled'));
+        return json_encode($form);
+    }
+
+    private const RPC_FORM_FIELDS = ['RPCHintInternal', 'RPCSettingsRow', 'RPCForwardScript', 'RPCHintScript'];
+
+    /** onChange-Handler der RPC-Checkbox: blendet die RPC-Felder live ein/aus */
+    public function UIToggleRPC(bool $Value): void
+    {
+        foreach (self::RPC_FORM_FIELDS as $field) {
+            $this->UpdateFormField($field, 'visible', $Value);
+        }
+    }
+
+    /**
+     * Popup-Button: lädt eine Registervorlage in die offene Konfiguration
+     * (nur UpdateFormField - gespeichert wird erst durch den Nutzer über
+     * "Änderungen übernehmen").
+     *
+     * @param string $Template 'rpc' | 'sunspec113'
+     */
+    public function LoadTemplate(string $Template): void
+    {
+        switch ($Template) {
+            case 'rpc':
+                $effective = $this->ReadPropertyBoolean('RPCEnabled') ? (int) @$this->GetIDForIdent('Effective') : 0;
+                $this->UpdateFormField('Registers', 'values', json_encode($this->templateRowsRPC($effective)));
+                $this->UpdateFormField('UnitID', 'value', 10);
+                $this->UpdateFormField('CheckUnitID', 'value', true);
+                $this->UpdateFormField('SwapWords', 'value', true);
+                $this->UpdateFormField('RPCEnabled', 'value', true);
+                $this->UIToggleRPC(true);
+                if ($effective > 0) {
+                    echo "Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt). Bitte die Istwert-Variablen (WR-Leistung, Netzleistung, P_AV) zuordnen und mit 'Änderungen übernehmen' speichern.";
+                } else {
+                    echo "Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt). Nach 'Änderungen übernehmen' die Vorlage erneut laden, damit die Sollwert-Register (4/8/104/108) automatisch mit der Variable 'Wirksamer DV-Sollwert' verknüpft werden. Istwert-Variablen bitte manuell zuordnen.";
+                }
+                return;
+
+            case 'sunspec113':
+                $this->UpdateFormField('Registers', 'values', json_encode($this->templateRowsSunSpec113()));
+                $this->UpdateFormField('SwapWords', 'value', false);
+                $this->UpdateFormField('CheckUnitID', 'value', true);
+                echo "SunSpec-Vorlage geladen (Word-Order ABCD gesetzt): Common Model 1 + Wechselrichter Model 113 (dreiphasig, float32) ab Basisregister 40000. Bitte Messwert-Variablen zuordnen, Unit-ID an die Gegenstelle anpassen (üblich 1 oder 126) und mit 'Änderungen übernehmen' speichern. Hinweis: Die Textfelder des Common Models (Hersteller/Modell/Seriennummer) liefern 0 - Strings unterstützt das Modul nicht.";
+                return;
+
+            default:
+                echo 'Unbekannte Vorlage: ' . $Template;
+        }
+    }
+
+    /** Abwärtskompatibler Alias (Button bis v1.1.0) */
     public function LoadRPCProfile(): void
     {
-        $effective = 0;
-        if ($this->ReadPropertyBoolean('RPCEnabled')) {
-            $effective = (int) @$this->GetIDForIdent('Effective');
-        }
-
-        $float = function (int $addr, string $name, int $variable = 0, float $fixed = 0.0) {
-            return ['Name' => $name, 'Area' => 0, 'Address' => $addr, 'DataType' => 'float32',
-                'VariableID' => $variable, 'Factor' => 1.0, 'Fixed' => $fixed, 'Writable' => false];
-        };
-        $int = function (int $addr, string $name, int $variable = 0, float $fixed = 0.0) {
-            return ['Name' => $name, 'Area' => 0, 'Address' => $addr, 'DataType' => 'int32',
-                'VariableID' => $variable, 'Factor' => 1.0, 'Fixed' => $fixed, 'Writable' => false];
-        };
-
-        $rows = [
-            $float(0, 'PPC_P_AC_INV - Summe WR-Wirkleistung (W)'),
-            $float(2, 'PPC_P_AC - Ist-Wirkleistung Netzanalysator (W)'),
-            $float(4, 'PPC_P_SET_REL - aktuell gültiger Sollwert (%)', $effective),
-            $float(6, 'PPC_P_SET_GRIDOP_REL - Sollwert Netzbetreiber (%)', 0, 100.0),
-            $float(8, 'PPC_P_SET_RPC_REL - Sollwert Direktvermarkter (%)', $effective),
-            $float(10, 'PPC_P_AC_GRIDOP_MAX - max. Leistung Netzbetreiber (W)'),
-            $float(12, 'PPC_P_AC_RPC_MAX - max. Leistung Dritte (W)'),
-            $float(14, 'PPC_P_SET_MODUS - Regelmodus (5 = RPC)', 0, 5.0),
-            $int(100, 'PPC_P_AC_INV - Summe WR-Wirkleistung (W, int32)'),
-            $int(102, 'PPC_P_AC - Ist-Wirkleistung Netzanalysator (W, int32)'),
-            $int(104, 'PPC_P_SET_REL - aktuell gültiger Sollwert (%, int32)', $effective),
-            $int(106, 'PPC_P_SET_GRIDOP_REL - Sollwert Netzbetreiber (%, int32)', 0, 100.0),
-            $int(108, 'PPC_P_SET_RPC_REL - Sollwert Direktvermarkter (%, int32)', $effective),
-            $int(110, 'PPC_P_AC_GRIDOP_MAX - max. Leistung Netzbetreiber (W, int32)'),
-            $int(112, 'PPC_P_AC_RPC_MAX - max. Leistung Dritte (W, int32)'),
-            $int(114, 'PPC_P_SET_MODUS - Regelmodus (5 = RPC, int32)', 0, 5.0),
-            $float(4000, 'PPC_P_AV - vereinbarte Anschlusswirkleistung (W)')
-        ];
-
-        $this->UpdateFormField('Registers', 'values', json_encode($rows));
-        $this->UpdateFormField('UnitID', 'value', 10);
-        $this->UpdateFormField('CheckUnitID', 'value', true);
-        $this->UpdateFormField('SwapWords', 'value', true);
-        $this->UpdateFormField('RPCEnabled', 'value', true);
-
-        if ($effective > 0) {
-            echo "Vorlage geladen. Bitte die Istwert-Variablen (WR-Leistung, Netzleistung, P_AV) zuordnen und mit 'Änderungen übernehmen' speichern.";
-        } else {
-            echo "Vorlage geladen. Nach 'Änderungen übernehmen' den Button erneut anklicken, damit die Sollwert-Register (4/8/104/108) automatisch mit der Variable 'Wirksamer DV-Sollwert' verknüpft werden. Istwert-Variablen bitte manuell zuordnen.";
-        }
+        $this->LoadTemplate('rpc');
     }
 
     /**
@@ -318,6 +328,95 @@ class ModbusTCPSlave extends IPSModule
     // ---------------------------------------------------------------------
     // interner Teil
     // ---------------------------------------------------------------------
+
+    private function setFormVisibility(array &$items, array $names, bool $visible): void
+    {
+        foreach ($items as &$item) {
+            if (isset($item['name']) && in_array($item['name'], $names, true)) {
+                $item['visible'] = $visible;
+            }
+            if (isset($item['items'])) {
+                $this->setFormVisibility($item['items'], $names, $visible);
+            }
+        }
+    }
+
+    private function templateRow(int $addr, string $type, string $name, int $variable = 0, float $fixed = 0.0): array
+    {
+        return ['Name' => $name, 'Area' => 0, 'Address' => $addr, 'DataType' => $type,
+            'VariableID' => $variable, 'Factor' => 1.0, 'Fixed' => $fixed, 'Writable' => false];
+    }
+
+    /** Meteocontrol blue'Log RPC: Istwert-Register (Datenblatt 05-2020) */
+    private function templateRowsRPC(int $effective): array
+    {
+        $rows = [];
+        foreach ([['float32', 0], ['int32', 100]] as [$type, $base]) {
+            $suffix = $base === 0 ? '' : ', int32';
+            $rows[] = $this->templateRow($base + 0, $type, "PPC_P_AC_INV - Summe WR-Wirkleistung (W$suffix)");
+            $rows[] = $this->templateRow($base + 2, $type, "PPC_P_AC - Ist-Wirkleistung Netzanalysator (W$suffix)");
+            $rows[] = $this->templateRow($base + 4, $type, "PPC_P_SET_REL - aktuell gültiger Sollwert (%$suffix)", $effective);
+            $rows[] = $this->templateRow($base + 6, $type, "PPC_P_SET_GRIDOP_REL - Sollwert Netzbetreiber (%$suffix)", 0, 100.0);
+            $rows[] = $this->templateRow($base + 8, $type, "PPC_P_SET_RPC_REL - Sollwert Direktvermarkter (%$suffix)", $effective);
+            $rows[] = $this->templateRow($base + 10, $type, "PPC_P_AC_GRIDOP_MAX - max. Leistung Netzbetreiber (W$suffix)");
+            $rows[] = $this->templateRow($base + 12, $type, "PPC_P_AC_RPC_MAX - max. Leistung Dritte (W$suffix)");
+            $rows[] = $this->templateRow($base + 14, $type, "PPC_P_SET_MODUS - Regelmodus (5 = RPC$suffix)", 0, 5.0);
+        }
+        $rows[] = $this->templateRow(4000, 'float32', 'PPC_P_AV - vereinbarte Anschlusswirkleistung (W)');
+        return $rows;
+    }
+
+    /**
+     * SunSpec: Common Model 1 + Wechselrichter Model 113 (dreiphasig, float32)
+     * ab Basisregister 40000, Word-Order ABCD. Die float-Modelle (111-113)
+     * kommen ohne Skalierungsfaktoren aus.
+     */
+    private function templateRowsSunSpec113(): array
+    {
+        $rows = [
+            $this->templateRow(40000, 'uint32', 'SunSpec-Kennung "SunS"', 0, 1400204883.0),
+            $this->templateRow(40002, 'uint16', 'Common Model - ID', 0, 1.0),
+            $this->templateRow(40003, 'uint16', 'Common Model - Länge', 0, 66.0),
+            $this->templateRow(40070, 'uint16', 'Model 113 - ID (WR dreiphasig, float)', 0, 113.0),
+            $this->templateRow(40071, 'uint16', 'Model 113 - Länge', 0, 60.0)
+        ];
+        $points = [
+            [40072, 'A - AC-Strom gesamt (A)'],
+            [40074, 'AphA - AC-Strom L1 (A)'],
+            [40076, 'AphB - AC-Strom L2 (A)'],
+            [40078, 'AphC - AC-Strom L3 (A)'],
+            [40080, 'PPVphAB - Spannung L1-L2 (V)'],
+            [40082, 'PPVphBC - Spannung L2-L3 (V)'],
+            [40084, 'PPVphCA - Spannung L3-L1 (V)'],
+            [40086, 'PhVphA - Spannung L1-N (V)'],
+            [40088, 'PhVphB - Spannung L2-N (V)'],
+            [40090, 'PhVphC - Spannung L3-N (V)'],
+            [40092, 'W - AC-Wirkleistung (W)'],
+            [40094, 'Hz - Netzfrequenz (Hz)'],
+            [40096, 'VA - Scheinleistung (VA)'],
+            [40098, 'VAr - Blindleistung (var)'],
+            [40100, 'PF - Leistungsfaktor'],
+            [40102, 'WH - Energieertrag gesamt (Wh)'],
+            [40104, 'DCA - DC-Strom (A)'],
+            [40106, 'DCV - DC-Spannung (V)'],
+            [40108, 'DCW - DC-Leistung (W)'],
+            [40110, 'TmpCab - Temperatur Gehäuse (°C)'],
+            [40112, 'TmpSnk - Temperatur Kühlkörper (°C)'],
+            [40114, 'TmpTrns - Temperatur Trafo (°C)'],
+            [40116, 'TmpOt - Temperatur sonstige (°C)']
+        ];
+        foreach ($points as [$addr, $name]) {
+            $rows[] = $this->templateRow($addr, 'float32', $name);
+        }
+        $rows[] = $this->templateRow(40118, 'uint16', 'St - Betriebszustand (4 = MPPT/Einspeisung)', 0, 4.0);
+        $rows[] = $this->templateRow(40119, 'uint16', 'StVnd - Betriebszustand herstellerspezifisch', 0, 0.0);
+        foreach ([[40120, 'Evt1'], [40122, 'Evt2'], [40124, 'EvtVnd1'], [40126, 'EvtVnd2'], [40128, 'EvtVnd3'], [40130, 'EvtVnd4']] as [$addr, $name]) {
+            $rows[] = $this->templateRow($addr, 'uint32', $name . ' - Ereignisbits', 0, 0.0);
+        }
+        $rows[] = $this->templateRow(40132, 'uint16', 'Endmodell - ID (0xFFFF)', 0, 65535.0);
+        $rows[] = $this->templateRow(40133, 'uint16', 'Endmodell - Länge', 0, 0.0);
+        return $rows;
+    }
 
     private function buildServer(): MBSLVModbusServer
     {

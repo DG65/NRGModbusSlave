@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.0 (2026-07-12)
+
+- Neu: SunSpec-Vorlage (Common Model 1 + Wechselrichter Model 113, float32, Basis 40000)
+- Vorlagen jetzt über Popup-Button "Vorlage laden..." wählbar (setzt auch die passende Word-Order)
+- Dynamisches Formular: RPC-Einstellungen werden nur bei aktivierter RPC-Schnittstelle angezeigt; Hinweis ergänzt, dass die Steuer-Register 5000/5006/5008 intern verwaltet werden und nicht in der Tabelle erscheinen
+- Formular aufgelockert (zwei Zeilen statt einer) und Option "Antwort beim Lesen unbelegter Register" verständlicher beschriftet und in der Doku erklärt
+
 ## 1.1.0 (2026-07-12)
 
 - Neu: Formular-Aktion "Weitere Schnittstellen anlegen" - erzeugt pro angegebenem Port (z. B. "501-505") eine Kopie der Instanz samt Server Socket; bereits belegte Ports werden übersprungen. Damit lassen sich Mehrfach-Anbindungen (z. B. Solarpark mit fünf Gegenstellen auf Ports 501-505) aus einer fertig konfigurierten Instanz heraus aufbauen
