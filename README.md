@@ -25,6 +25,9 @@ Clients auf demselben Port sind möglich** – jede Verbindung erhält einen eig
 Sollen mehrere getrennte Schnittstellen bedient werden (z. B. verschiedene Ports oder
 unterschiedliche Registerbelegungen je Gegenstelle), wird je Schnittstelle eine eigene
 Instanz mit eigenem Server Socket angelegt – ein I/O pro Port entspricht der IPS-Architektur.
+Die Formular-Aktion **„Weitere Schnittstellen anlegen"** nimmt dabei die Arbeit ab: Eine
+Instanz fertig konfigurieren, Portliste eintragen (z. B. „501-505") – für jeden noch freien
+Port entsteht eine Kopie samt Server Socket.
 
 **Unterstützte Function Codes:**
 

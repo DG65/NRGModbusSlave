@@ -24,6 +24,8 @@ require_once __DIR__ . '/../libs/ModbusServer.php';
  */
 class ModbusTCPSlave extends IPSModule
 {
+    // eigene Modul-GUID (siehe module.json)
+    private const MODULE_GUID = '{3F519A7D-1ABC-417D-BC08-8CCEDE0BEEE8}';
     // IPS Server Socket (I/O), wird als Parent benötigt
     private const SERVER_SOCKET_MODULE = '{8062CF2B-600E-41D6-AD4B-1BA66C32D6ED}';
     // Datenpaket "Erweitert (Socket)": Empfang vom Server Socket
@@ -230,6 +232,87 @@ class ModbusTCPSlave extends IPSModule
         } else {
             echo "Vorlage geladen. Nach 'Änderungen übernehmen' den Button erneut anklicken, damit die Sollwert-Register (4/8/104/108) automatisch mit der Variable 'Wirksamer DV-Sollwert' verknüpft werden. Istwert-Variablen bitte manuell zuordnen.";
         }
+    }
+
+    /**
+     * Formular-Button: legt für jeden angegebenen Port eine Kopie dieser
+     * Instanz samt Server Socket an (z. B. "502-505" oder "502,503").
+     * Ports, auf denen bereits eine ModbusTCPSlave-Instanz lauscht (inklusive
+     * dieser), werden übersprungen. Die neuen Instanzen sind vollständige
+     * Kopien der GESPEICHERTEN Konfiguration dieser Instanz.
+     */
+    public function CreateSiblings(string $Ports): void
+    {
+        $ports = [];
+        foreach (explode(',', $Ports) as $part) {
+            $part = trim($part);
+            if (preg_match('/^(\d+)\s*-\s*(\d+)$/', $part, $m)) {
+                for ($p = (int) $m[1]; $p <= (int) $m[2] && count($ports) < 50; $p++) {
+                    $ports[] = $p;
+                }
+            } elseif ($part !== '' && preg_match('/^\d+$/', $part)) {
+                $ports[] = (int) $part;
+            }
+        }
+        $ports = array_values(array_unique(array_filter($ports, fn ($p) => $p > 0 && $p <= 65535)));
+        if ($ports === []) {
+            echo "Keine gültigen Ports angegeben. Beispiele: '502-505' oder '502,503,1502'.";
+            return;
+        }
+
+        // bereits belegte Ports aller ModbusTCPSlave-Instanzen ermitteln
+        $usedPorts = [];
+        foreach (IPS_GetInstanceListByModuleID(self::MODULE_GUID) as $instanceID) {
+            $socket = IPS_GetInstance($instanceID)['ConnectionID'];
+            if ($socket > 0) {
+                $usedPorts[(int) IPS_GetProperty($socket, 'Port')] = true;
+            }
+        }
+
+        $config = json_decode(IPS_GetConfiguration($this->InstanceID), true);
+        $baseName = preg_replace('/ \(Port \d+\)$/', '', IPS_GetName($this->InstanceID));
+        $location = IPS_GetObject($this->InstanceID)['ParentID'];
+
+        $created = [];
+        $skipped = [];
+        foreach ($ports as $port) {
+            if (isset($usedPorts[$port])) {
+                $skipped[] = $port;
+                continue;
+            }
+
+            $instance = IPS_CreateInstance(self::MODULE_GUID);
+            IPS_SetName($instance, $baseName . ' (Port ' . $port . ')');
+            IPS_SetParent($instance, $location);
+            foreach ($config as $property => $value) {
+                IPS_SetProperty($instance, $property, $value);
+            }
+            IPS_ApplyChanges($instance);
+
+            // RequireParent legt den Server Socket normalerweise automatisch an
+            $socket = IPS_GetInstance($instance)['ConnectionID'];
+            if ($socket === 0) {
+                $socket = IPS_CreateInstance(self::SERVER_SOCKET_MODULE);
+                IPS_ConnectInstance($instance, $socket);
+            }
+            IPS_SetName($socket, 'Server Socket (Modbus TCP Slave Port ' . $port . ')');
+            IPS_SetProperty($socket, 'Port', $port);
+            IPS_SetProperty($socket, 'Open', true);
+            @IPS_ApplyChanges($socket);
+
+            $usedPorts[$port] = true;
+            $created[] = $port;
+        }
+
+        $message = [];
+        if ($created !== []) {
+            $message[] = 'Angelegt: Port ' . implode(', ', $created) . '.';
+        }
+        if ($skipped !== []) {
+            $message[] = 'Übersprungen (bereits belegt): Port ' . implode(', ', $skipped) . '.';
+        }
+        $message[] = 'Hinweis: Kopiert wurde die zuletzt GESPEICHERTE Konfiguration dieser Instanz.';
+        echo implode("\n", $message);
     }
 
     // ---------------------------------------------------------------------

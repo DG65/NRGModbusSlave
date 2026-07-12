@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0 (2026-07-12)
+
+- Neu: Formular-Aktion "Weitere Schnittstellen anlegen" - erzeugt pro angegebenem Port (z. B. "501-505") eine Kopie der Instanz samt Server Socket; bereits belegte Ports werden übersprungen. Damit lassen sich Mehrfach-Anbindungen (z. B. Solarpark mit fünf Gegenstellen auf Ports 501-505) aus einer fertig konfigurierten Instanz heraus aufbauen
+
 ## 1.0.2 (2026-07-12)
 
 - Port des Server Sockets nicht mehr durch das Modul erzwungen (GetConfigurationForParent entfernt) - der Port ist jetzt am Socket frei einstellbar, z. B. für mehrere Slave-Instanzen auf unterschiedlichen Ports
