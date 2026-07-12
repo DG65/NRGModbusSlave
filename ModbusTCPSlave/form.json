@@ -1,0 +1,191 @@
+{
+  "elements": [
+    {
+      "type": "ExpansionPanel",
+      "caption": "📖 Doku",
+      "expanded": false,
+      "items": [
+        {
+          "type": "Label",
+          "caption": "Dieses Modul macht IP-Symcon zum Modbus-TCP-Slave (Server): externe Modbus-Master lesen und schreiben IPS-Variablen über die unten definierte Registertabelle. Der TCP-Port wird auf der übergeordneten Server-Socket-Instanz eingestellt (Standard 502)."
+        },
+        {
+          "type": "Label",
+          "caption": "Registertabelle: Jede Zeile bildet einen Wert ab. 'Adresse' ist die 0-basierte Protokolladresse des ersten Words; Mehrwort-Typen (int32/uint32/float32 = 2 Words, float64 = 4 Words) belegen die Folgeadressen. 'Faktor' skaliert von der Variable zum Register (Registerwert = Variablenwert x Faktor; beim Schreiben umgekehrt). Ist keine Variable zugeordnet, wird der 'Festwert' geliefert. Nur Zeilen mit 'Schreibbar' akzeptieren FC 06/16; besitzt die Zielvariable eine Aktion, wird RequestAction verwendet, sonst SetValue."
+        },
+        {
+          "type": "Label",
+          "caption": "Word-Reihenfolge: Modbus überträgt jedes 16-Bit-Register Big-Endian. Bei Mehrwort-Werten bestimmt die Option 'Low-Word zuerst' die Word-Reihenfolge (eingeschaltet = CDAB, wie Meteocontrol blue'Log; ausgeschaltet = ABCD)."
+        },
+        {
+          "type": "Label",
+          "caption": "Meteocontrol RPC (Direktvermarktung): Emuliert die Remote-Power-Control-Schnittstelle des blue'Log XM/XC. Der Direktvermarkter schreibt die Wirkleistungsvorgabe in Register 5000 (float32, 0-125 %), die Gültigkeitsdauer in 5006 (min) und verlängert per Watchdog-Register 5008. Läuft die Gültigkeit ab, fällt der 'Wirksame DV-Sollwert' auf den Rückfall-Sollwert zurück. Die Istwert-Register (0-14, 100-114, 4000) werden über die Registertabelle bedient - Vorlage per Button laden."
+        }
+      ]
+    },
+    {
+      "type": "RowLayout",
+      "items": [
+        {
+          "type": "NumberSpinner",
+          "name": "UnitID",
+          "caption": "Unit-ID",
+          "minimum": 0,
+          "maximum": 255
+        },
+        {
+          "type": "CheckBox",
+          "name": "CheckUnitID",
+          "caption": "Unit-ID prüfen"
+        },
+        {
+          "type": "CheckBox",
+          "name": "SwapWords",
+          "caption": "Low-Word zuerst (blue'Log/RPC)"
+        },
+        {
+          "type": "Select",
+          "name": "UnmappedRead",
+          "caption": "Lesen unbelegter Register",
+          "options": [
+            { "caption": "0 liefern", "value": 0 },
+            { "caption": "Exception (Illegal Data Address)", "value": 1 }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "List",
+      "name": "Registers",
+      "caption": "Registertabelle",
+      "rowCount": 18,
+      "add": true,
+      "delete": true,
+      "columns": [
+        {
+          "caption": "Name",
+          "name": "Name",
+          "width": "300px",
+          "add": "",
+          "edit": { "type": "ValidationTextBox" }
+        },
+        {
+          "caption": "Bereich",
+          "name": "Area",
+          "width": "100px",
+          "add": 0,
+          "edit": {
+            "type": "Select",
+            "options": [
+              { "caption": "Holding", "value": 0 },
+              { "caption": "Input", "value": 1 }
+            ]
+          }
+        },
+        {
+          "caption": "Adresse",
+          "name": "Address",
+          "width": "90px",
+          "add": 0,
+          "edit": { "type": "NumberSpinner", "minimum": 0, "maximum": 65535 }
+        },
+        {
+          "caption": "Datentyp",
+          "name": "DataType",
+          "width": "100px",
+          "add": "uint16",
+          "edit": {
+            "type": "Select",
+            "options": [
+              { "caption": "uint16", "value": "uint16" },
+              { "caption": "int16", "value": "int16" },
+              { "caption": "uint32", "value": "uint32" },
+              { "caption": "int32", "value": "int32" },
+              { "caption": "float32", "value": "float32" },
+              { "caption": "float64", "value": "float64" }
+            ]
+          }
+        },
+        {
+          "caption": "Variable",
+          "name": "VariableID",
+          "width": "auto",
+          "add": 0,
+          "edit": { "type": "SelectVariable" }
+        },
+        {
+          "caption": "Faktor",
+          "name": "Factor",
+          "width": "80px",
+          "add": 1.0,
+          "edit": { "type": "NumberSpinner", "digits": 6 }
+        },
+        {
+          "caption": "Festwert",
+          "name": "Fixed",
+          "width": "90px",
+          "add": 0.0,
+          "edit": { "type": "NumberSpinner", "digits": 3 }
+        },
+        {
+          "caption": "Schreibbar",
+          "name": "Writable",
+          "width": "95px",
+          "add": false,
+          "edit": { "type": "CheckBox" }
+        }
+      ]
+    },
+    {
+      "type": "ExpansionPanel",
+      "caption": "⚡ Meteocontrol RPC / Direktvermarktung",
+      "expanded": true,
+      "items": [
+        {
+          "type": "CheckBox",
+          "name": "RPCEnabled",
+          "caption": "RPC-Schnittstelle (Register 5000/5006/5008) aktivieren"
+        },
+        {
+          "type": "RowLayout",
+          "items": [
+            {
+              "type": "NumberSpinner",
+              "name": "RPCFallback",
+              "caption": "Rückfall-Sollwert nach Ablauf",
+              "digits": 1,
+              "suffix": " %",
+              "minimum": 0,
+              "maximum": 125
+            },
+            {
+              "type": "NumberSpinner",
+              "name": "RPCDefaultValidTime",
+              "caption": "Standard-Gültigkeitsdauer",
+              "digits": 0,
+              "suffix": " min",
+              "minimum": 1,
+              "maximum": 255
+            }
+          ]
+        },
+        {
+          "type": "SelectScript",
+          "name": "RPCForwardScript",
+          "caption": "Skript bei Sollwert-Ereignis (optional, z. B. Weiterleitung an blue'Log)"
+        },
+        {
+          "type": "Label",
+          "caption": "Das Skript erhält $_IPS['Action'] (setpoint | watchdog | expired), $_IPS['Setpoint'], $_IPS['Valid'] und $_IPS['InstanceID']. Alternativ einfach ein Ereignis auf die Variable 'Wirksamer DV-Sollwert' legen."
+        },
+        {
+          "type": "Button",
+          "caption": "blue'Log-RPC-Registervorlage laden",
+          "onClick": "MBSLV_LoadRPCProfile($id);"
+        }
+      ]
+    }
+  ],
+  "actions": [],
+  "status": []
+}

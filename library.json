@@ -1,0 +1,12 @@
+{
+  "id": "{1C9B79B6-35D6-4381-907C-ADAE1FEAF307}",
+  "name": "ModbusSlave",
+  "author": "DG65",
+  "url": "https://github.com/DG65/ModbusSlave",
+  "version": "1.0.0",
+  "build": 1,
+  "date": 0,
+  "compatibility": {
+    "version": "7.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "{3F519A7D-1ABC-417D-BC08-8CCEDE0BEEE8}",
+  "name": "ModbusTCPSlave",
+  "type": 3,
+  "vendor": "",
+  "aliases": ["Modbus TCP Slave", "Modbus TCP Server", "Direktvermarktung RPC"],
+  "parentRequirements": ["{C8792760-65CF-4C53-B5C7-A30FCC84FEFE}"],
+  "childRequirements": [],
+  "implemented": ["{7A1272A4-CBDB-46EF-BFC6-DCF4A53D2FC7}"],
+  "prefix": "MBSLV"
+}
