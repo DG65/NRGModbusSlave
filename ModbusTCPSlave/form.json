@@ -15,11 +15,11 @@
         },
         {
           "type": "Label",
-          "caption": "Word-Reihenfolge: Modbus überträgt jedes 16-Bit-Register Big-Endian. Bei Mehrwort-Werten bestimmt die Option 'Low-Word zuerst' die Word-Reihenfolge (eingeschaltet = CDAB, wie Meteocontrol blue'Log; ausgeschaltet = ABCD)."
+          "caption": "Word-Reihenfolge: Modbus überträgt jedes 16-Bit-Register Big-Endian. Bei Mehrwort-Werten bestimmt die Option 'Low-Word zuerst' die Word-Reihenfolge (eingeschaltet = CDAB, z. B. Meteocontrol; ausgeschaltet = ABCD, z. B. SunSpec). Was die Gegenstelle erwartet, steht in deren Registerdokumentation."
         },
         {
           "type": "Label",
-          "caption": "Meteocontrol RPC (Direktvermarktung): Emuliert die Remote-Power-Control-Schnittstelle des blue'Log XM/XC. Der Direktvermarkter schreibt die Wirkleistungsvorgabe in Register 5000 (float32, 0-125 %), die Gültigkeitsdauer in 5006 (min) und verlängert per Watchdog-Register 5008. Läuft die Gültigkeit ab, fällt der 'Wirksame DV-Sollwert' auf den Rückfall-Sollwert zurück. Die Istwert-Register (0-14, 100-114, 4000) werden über die Registertabelle bedient - Vorlage per Button laden."
+          "caption": "Vorlagen: Über Buttons lassen sich vorbereitete Registerbelegungen in die Tabelle laden (aktuell: Meteocontrol blue'Log RPC für die Direktvermarktung - der Master schreibt die Wirkleistungsvorgabe in Register 5000, die Gültigkeitsdauer in 5006 und verlängert per Watchdog-Register 5008; nach Ablauf fällt der 'Wirksame DV-Sollwert' auf den Rückfall-Sollwert zurück). Gespeichert wird erst mit 'Änderungen übernehmen'."
         }
       ]
     },
@@ -41,7 +41,7 @@
         {
           "type": "CheckBox",
           "name": "SwapWords",
-          "caption": "Low-Word zuerst (blue'Log/RPC)"
+          "caption": "Low-Word zuerst (CDAB)"
         },
         {
           "type": "Select",
@@ -138,8 +138,8 @@
     },
     {
       "type": "ExpansionPanel",
-      "caption": "⚡ Meteocontrol RPC / Direktvermarktung",
-      "expanded": true,
+      "caption": "⚡ Vorlage: Meteocontrol RPC / Direktvermarktung",
+      "expanded": false,
       "items": [
         {
           "type": "CheckBox",

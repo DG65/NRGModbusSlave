@@ -3,8 +3,8 @@
   "name": "ModbusSlave",
   "author": "DG65",
   "url": "https://github.com/DG65/ModbusSlave",
-  "version": "1.0.0",
-  "build": 1,
+  "version": "1.0.1",
+  "build": 2,
   "date": 0,
   "compatibility": {
     "version": "7.0"

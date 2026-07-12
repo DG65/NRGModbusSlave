@@ -8,18 +8,19 @@ require_once __DIR__ . '/../libs/ModbusServer.php';
  * ModbusTCPSlave
  *
  * Macht IP-Symcon zum Modbus-TCP-Slave (Server): externe Modbus-Master können
- * IPS-Variablen über eine frei konfigurierbare Registertabelle lesen und schreiben.
+ * IPS-Variablen über eine frei konfigurierbare Registertabelle lesen und
+ * schreiben (FC 03/04/06/16, uint16 bis float64, umschaltbare Word-Reihenfolge).
  * Als I/O dient der IPS Server Socket (wird als Parent automatisch angelegt).
+ * Typische Einsätze: IPS-Daten für EMS, SCADA, Wallboxen, Logger oder Regler
+ * bereitstellen bzw. Sollwerte von solchen Systemen entgegennehmen.
  *
- * Optional emuliert das Modul die Remote-Power-Control-(RPC-)Schnittstelle des
- * Meteocontrol blue'Log XM/XC für die Direktvermarktung: Sollwertvorgabe
+ * Als optionales Profil ist die Remote-Power-Control-(RPC-)Schnittstelle des
+ * Meteocontrol blue'Log XM/XC enthalten (Direktvermarktung): Sollwertvorgabe
  * (Register 5000), Gültigkeitsdauer (5006) und Watchdog (5008) inklusive
- * Ablauf-Logik. Der zuletzt gültige bzw. der Rückfall-Sollwert steht als
- * Variable "Wirksamer DV-Sollwert" bereit (z. B. fürs EMS oder zur
- * Weiterleitung an einen echten blue'Log).
- *
- * Protokoll-Referenz: Datenblatt "Remote Power Control (RPC) blue'Log XM/XC",
- * Meteocontrol, Stand 05-2020 (Unit-ID 10, FC 03/16, Word-Order Low vor High).
+ * Ablauf-Logik; Registervorlage per Formular-Button. Protokoll-Referenz:
+ * Datenblatt "Remote Power Control (RPC) blue'Log XM/XC", Stand 05-2020.
+ * Weitere Vorlagen (z. B. SunSpec-Ausschnitte) sind nach demselben Muster
+ * ergänzbar.
  */
 class ModbusTCPSlave extends IPSModule
 {
@@ -37,9 +38,9 @@ class ModbusTCPSlave extends IPSModule
 
         $this->RequireParent(self::SERVER_SOCKET_MODULE);
 
-        $this->RegisterPropertyInteger('UnitID', 10);
+        $this->RegisterPropertyInteger('UnitID', 1);
         $this->RegisterPropertyBoolean('CheckUnitID', true);
-        $this->RegisterPropertyBoolean('SwapWords', true);
+        $this->RegisterPropertyBoolean('SwapWords', false);
         $this->RegisterPropertyInteger('UnmappedRead', MBSLVModbusServer::UNMAPPED_ZERO);
         $this->RegisterPropertyString('Registers', '[]');
 
