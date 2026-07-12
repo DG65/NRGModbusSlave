@@ -156,12 +156,6 @@ class ModbusTCPSlave extends IPSModule
         return '';
     }
 
-    /** Standard-Port für den automatisch angelegten Server Socket */
-    public function GetConfigurationForParent()
-    {
-        return json_encode(['Port' => 502]);
-    }
-
     /**
      * Timer-Callback: prüft den Ablauf der DV-Sollwertvorgabe und schaltet nach
      * Ablauf der Gültigkeitsdauer auf den Rückfall-Sollwert.

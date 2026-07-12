@@ -17,9 +17,14 @@ ergänzt die Gegenrichtung. Typische Einsätze:
 ### Funktionsweise
 
 Das Modul hängt als Gerät unter einer **Server-Socket**-Instanz (wird beim Anlegen automatisch
-erstellt, Standard-Port 502). Eingehende Modbus-TCP-Anfragen werden pro Client gepuffert
-(TCP-Fragmentierung wird korrekt behandelt), gegen die Registertabelle beantwortet und gerichtet
-an den anfragenden Client zurückgesendet. Mehrere gleichzeitige Clients sind möglich.
+erstellt; den Port dort frei einstellen, üblich ist 502). Eingehende Modbus-TCP-Anfragen werden
+pro Client gepuffert (TCP-Fragmentierung wird korrekt behandelt), gegen die Registertabelle
+beantwortet und gerichtet an den anfragenden Client zurückgesendet. **Mehrere gleichzeitige
+Clients auf demselben Port sind möglich** – jede Verbindung erhält einen eigenen Empfangspuffer.
+
+Sollen mehrere getrennte Schnittstellen bedient werden (z. B. verschiedene Ports oder
+unterschiedliche Registerbelegungen je Gegenstelle), wird je Schnittstelle eine eigene
+Instanz mit eigenem Server Socket angelegt – ein I/O pro Port entspricht der IPS-Architektur.
 
 **Unterstützte Function Codes:**
 
@@ -81,7 +86,7 @@ und den Wert über eine IPS-ModBus-Master-Instanz in Register 5000 des blue'Log 
 
 1. Modul über die Modulverwaltung installieren (GitHub-URL)
 2. Instanz „Modbus TCP Slave" anlegen – der Server Socket wird automatisch erstellt
-3. Port am Server Socket prüfen (Standard 502) und Socket aktivieren
+3. Port am Server Socket einstellen (z. B. 502) und Socket aktivieren
 4. Registertabelle füllen (manuell oder per Vorlage), Variablen zuordnen, übernehmen
 
 ### Test von der Kommandozeile
