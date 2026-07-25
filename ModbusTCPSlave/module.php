@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../libs/ModbusServer.php';
 
 /**
- * NRGModbusTCPSlave (vormals ModbusTCPSlave)
+ * ModbusTCPSlave (NRG-Stack: "NRGModbusTCPSlave" als Alias)
  *
  * Macht IP-Symcon zum Modbus-TCP-Slave (Server): externe Modbus-Master können
  * IPS-Variablen über eine frei konfigurierbare Registertabelle lesen und
@@ -22,7 +22,7 @@ require_once __DIR__ . '/../libs/ModbusServer.php';
  * Weitere Vorlagen (z. B. SunSpec-Ausschnitte) sind nach demselben Muster
  * ergänzbar.
  */
-class NRGModbusTCPSlave extends IPSModule
+class ModbusTCPSlave extends IPSModule
 {
     // eigene Modul-GUID (siehe module.json)
     private const MODULE_GUID = '{3F519A7D-1ABC-417D-BC08-8CCEDE0BEEE8}';

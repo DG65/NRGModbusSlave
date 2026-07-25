@@ -12,7 +12,7 @@ ergänzt die Gegenrichtung. Typische Einsätze:
   um Systeme anzubinden, die einen bestimmten Modbus-Teilnehmer erwarten
 - Direktvermarktungs-Schnittstellen (siehe Vorlage unten)
 
-## Modul: NRGModbusTCPSlave
+## Modul: ModbusTCPSlave
 
 ### Funktionsweise
 

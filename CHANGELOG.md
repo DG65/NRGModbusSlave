@@ -2,7 +2,7 @@
 
 ## 1.4.0 (2026-07-25)
 
-- Verbund-Umbenennung mit NRG-Präfix: Bibliothek heißt jetzt "NRGModbusSlave", das Modul "NRGModbusTCPSlave" (PHP-Klasse entsprechend umbenannt, alter Name bleibt als Alias suchbar). GUID, Prefix (MBSLV) und Variablen-Idents sind unverändert - bestehende Instanzen und Skriptaufrufe laufen unverändert weiter
+- Verbund-Umbenennung mit NRG-Präfix: Bibliothek heißt jetzt "NRGModbusSlave", Repo-URL auf github.com/DG65/NRGModbusSlave aktualisiert. Der Modulname in module.json bleibt "ModbusTCPSlave" (= PHP-Klassenname, von IPS per Reflection gesucht - Umbenennung würde das Modul zerschossen); "NRGModbusTCPSlave" ist als Alias suchbar. GUID, Prefix (MBSLV) und Variablen-Idents unverändert
 
 ## 1.3.0 (2026-07-12)
 
