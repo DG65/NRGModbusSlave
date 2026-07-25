@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0 (2026-07-25)
+
+- Verbund-Umbenennung mit NRG-Präfix: Bibliothek heißt jetzt "NRGModbusSlave", das Modul "NRGModbusTCPSlave" (PHP-Klasse entsprechend umbenannt, alter Name bleibt als Alias suchbar). GUID, Prefix (MBSLV) und Variablen-Idents sind unverändert - bestehende Instanzen und Skriptaufrufe laufen unverändert weiter
+
 ## 1.3.0 (2026-07-12)
 
 - Neu: Button "Datenpunkte für unzugeordnete Register anlegen" - legt für alle Tabellenzeilen ohne zugeordnete Variable einen Datenpunkt unter der Instanz an (float für float32/64, sonst integer) und trägt ihn direkt in die Tabelle ein. Zeilen mit Festwert (Header/Konstanten, z. B. SunSpec-Modell-IDs) bleiben unangetastet; wiederholtes Ausführen verwendet vorhandene Datenpunkte wieder

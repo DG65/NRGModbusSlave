@@ -1,6 +1,6 @@
-# ModbusSlave
+# NRGModbusSlave
 
-IP-Symcon-Bibliothek, die IPS zum **Modbus-TCP-Slave (Server)** macht. Externe Modbus-Master
+IP-Symcon-Bibliothek aus dem NRG-Stack, die IPS zum **Modbus-TCP-Slave (Server)** macht. Externe Modbus-Master
 lesen und schreiben IPS-Variablen über eine frei konfigurierbare Registertabelle.
 
 IP-Symcon selbst bietet von Haus aus nur Modbus-**Master**-Funktionalität – dieses Modul
@@ -12,7 +12,7 @@ ergänzt die Gegenrichtung. Typische Einsätze:
   um Systeme anzubinden, die einen bestimmten Modbus-Teilnehmer erwarten
 - Direktvermarktungs-Schnittstellen (siehe Vorlage unten)
 
-## Modul: ModbusTCPSlave
+## Modul: NRGModbusTCPSlave
 
 ### Funktionsweise
 
