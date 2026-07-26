@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1 (2026-07-26)
+
+- Härtung gemäß Verbund-Erkenntnis (SUITE.md-Stolperstein 3): RegisterVariableXXX wird nur noch bei echter Neuanlage aufgerufen (Guard über GetIDForIdent), sowohl in ApplyChanges (RPC-Variablen) als auch im Datenpunkte-Button
+
 ## 1.4.0 (2026-07-25)
 
 - Verbund-Umbenennung mit NRG-Präfix: Bibliothek heißt jetzt "NRGModbusSlave", Repo-URL auf github.com/DG65/NRGModbusSlave aktualisiert. Der Modulname in module.json bleibt "ModbusTCPSlave" (= PHP-Klassenname, von IPS per Reflection gesucht - Umbenennung würde das Modul zerschossen); "NRGModbusTCPSlave" ist als Alias suchbar. GUID, Prefix (MBSLV) und Variablen-Idents unverändert

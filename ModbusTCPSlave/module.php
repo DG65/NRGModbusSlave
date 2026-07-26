@@ -74,12 +74,13 @@ class ModbusTCPSlave extends IPSModule
         $this->ensureProfiles();
 
         if ($this->ReadPropertyBoolean('RPCEnabled')) {
-            $this->RegisterVariableFloat('Setpoint', 'DV-Sollwertvorgabe', 'MBSLV.Percent', 10);
-            $this->RegisterVariableBoolean('SetpointValid', 'DV-Vorgabe gültig', '~Switch', 20);
-            $this->RegisterVariableInteger('ValidUntil', 'DV-Vorgabe gültig bis', '~UnixTimestamp', 30);
-            $this->RegisterVariableFloat('Effective', 'Wirksamer DV-Sollwert', 'MBSLV.Percent', 40);
-            $this->RegisterVariableFloat('ValidTime', 'Gültigkeitsdauer', 'MBSLV.Minutes', 50);
-            $this->RegisterVariableInteger('LastWrite', 'Letzte DV-Vorgabe', '~UnixTimestamp', 60);
+            // nur bei echter Neuanlage registrieren (SUITE.md-Stolperstein 3)
+            $this->registerVarOnce('float', 'Setpoint', 'DV-Sollwertvorgabe', 'MBSLV.Percent', 10);
+            $this->registerVarOnce('bool', 'SetpointValid', 'DV-Vorgabe gültig', '~Switch', 20);
+            $this->registerVarOnce('int', 'ValidUntil', 'DV-Vorgabe gültig bis', '~UnixTimestamp', 30);
+            $this->registerVarOnce('float', 'Effective', 'Wirksamer DV-Sollwert', 'MBSLV.Percent', 40);
+            $this->registerVarOnce('float', 'ValidTime', 'Gültigkeitsdauer', 'MBSLV.Minutes', 50);
+            $this->registerVarOnce('int', 'LastWrite', 'Letzte DV-Vorgabe', '~UnixTimestamp', 60);
 
             if ($this->GetValue('ValidTime') < 1) {
                 $this->SetValue('ValidTime', $this->ReadPropertyFloat('RPCDefaultValidTime'));
@@ -285,12 +286,9 @@ class ModbusTCPSlave extends IPSModule
             if ($name === '') {
                 $name = 'Register ' . $address;
             }
-            $existed = @$this->GetIDForIdent($ident) > 0;
-            if (in_array((string) ($row['DataType'] ?? 'uint16'), ['float32', 'float64'], true)) {
-                $id = $this->RegisterVariableFloat($ident, $name, '', 1000 + $address);
-            } else {
-                $id = $this->RegisterVariableInteger($ident, $name, '', 1000 + $address);
-            }
+            $existed = (int) @$this->GetIDForIdent($ident) > 0;
+            $isFloat = in_array((string) ($row['DataType'] ?? 'uint16'), ['float32', 'float64'], true);
+            $id = $this->registerVarOnce($isFloat ? 'float' : 'int', $ident, $name, '', 1000 + $address);
             $row['VariableID'] = $id;
             $existed ? $reused++ : $created++;
         }
@@ -390,6 +388,26 @@ class ModbusTCPSlave extends IPSModule
     // ---------------------------------------------------------------------
     // interner Teil
     // ---------------------------------------------------------------------
+
+    /**
+     * Variable nur bei echter Neuanlage registrieren (SUITE.md-Stolperstein 3:
+     * RegisterVariableXXX nicht bedingungslos für bestehende Variablen aufrufen).
+     */
+    private function registerVarOnce(string $type, string $ident, string $name, string $profile, int $position): int
+    {
+        $id = (int) @$this->GetIDForIdent($ident);
+        if ($id > 0) {
+            return $id;
+        }
+        switch ($type) {
+            case 'bool':
+                return $this->RegisterVariableBoolean($ident, $name, $profile, $position);
+            case 'int':
+                return $this->RegisterVariableInteger($ident, $name, $profile, $position);
+            default:
+                return $this->RegisterVariableFloat($ident, $name, $profile, $position);
+        }
+    }
 
     private function setFormVisibility(array &$items, array $names, bool $visible): void
     {
