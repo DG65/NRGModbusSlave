@@ -23,6 +23,10 @@
         },
         {
           "type": "Label",
+          "caption": "Statusampel und Kommunikationsüberwachung: Die Variable 'Letzte Modbus-Anfrage' zeigt jederzeit, wann zuletzt ein Master gepollt hat. Ist der Server Socket nicht aktiv, wechselt die Instanz auf einen Fehlerstatus. Mit der Kommunikationsüberwachung (Minuten, 0 = aus) meldet die Instanz zusätzlich einen Fehler, wenn so lange keine Modbus-Anfrage mehr eintraf - für die Direktvermarktung empfohlen (z. B. 5 min), denn 'Master pollt nicht mehr' ist dort der wichtigste Alarmzustand."
+        },
+        {
+          "type": "Label",
           "caption": "Vorlagen: Der Button 'Vorlage laden' füllt die Registertabelle mit einer vorbereiteten Belegung (Meteocontrol blue'Log RPC oder SunSpec-Wechselrichter) und setzt die passende Word-Order. Gespeichert wird erst mit 'Änderungen übernehmen'."
         },
         {
@@ -58,10 +62,19 @@
           "type": "Select",
           "name": "UnmappedRead",
           "caption": "Antwort beim Lesen unbelegter Register",
+          "width": "340px",
           "options": [
             { "caption": "0 liefern (tolerant, Standard)", "value": 0 },
             { "caption": "Modbus-Exception 'Illegal Data Address'", "value": 1 }
           ]
+        },
+        {
+          "type": "NumberSpinner",
+          "name": "CommTimeout",
+          "caption": "Kommunikationsüberwachung (0 = aus)",
+          "suffix": " min",
+          "minimum": 0,
+          "maximum": 1440
         }
       ]
     },
@@ -273,5 +286,16 @@
       ]
     }
   ],
-  "status": []
+  "status": [
+    {
+      "code": 201,
+      "icon": "error",
+      "caption": "Server Socket nicht aktiv - Port prüfen und Socket öffnen"
+    },
+    {
+      "code": 202,
+      "icon": "error",
+      "caption": "Keine Modbus-Anfragen innerhalb der Überwachungszeit"
+    }
+  ]
 }

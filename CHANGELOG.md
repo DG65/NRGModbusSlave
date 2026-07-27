@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.0 (2026-07-27)
+
+- Statusampel (Verbund-Zielbild "Zuverlässigkeit ohne KI-Krücke"): Instanzstatus spiegelt jetzt sichtbar den Betriebszustand - Fehlerstatus 201 bei inaktivem Server Socket, Fehlerstatus 202 wenn innerhalb der konfigurierbaren Kommunikationsüberwachung (Minuten, 0 = aus) keine Modbus-Anfrage eintraf ("Master pollt nicht mehr")
+- Neue Variable "Letzte Modbus-Anfrage" (Zeitstempel, max. alle 5 s aktualisiert) als Lebenszeichen ohne Log-Zugriff
+
 ## 1.4.1 (2026-07-26)
 
 - Härtung gemäß Verbund-Erkenntnis (SUITE.md-Stolperstein 3): RegisterVariableXXX wird nur noch bei echter Neuanlage aufgerufen (Guard über GetIDForIdent), sowohl in ApplyChanges (RPC-Variablen) als auch im Datenpunkte-Button

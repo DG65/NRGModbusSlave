@@ -51,6 +51,11 @@ und int32-Darstellung parallel).
 wahlweise 0 (tolerant, Standard – sinnvoll, wenn Master ganze Blöcke lesen) oder eine
 Modbus-Exception „Illegal Data Address" (strikt).
 
+**Statusampel:** Die Variable „Letzte Modbus-Anfrage" zeigt das letzte Lebenszeichen des
+Masters. Der Instanzstatus meldet sichtbar (ohne Log-Zugriff), wenn der Server Socket nicht
+aktiv ist oder – bei aktivierter Kommunikationsüberwachung (Minuten, 0 = aus) – wenn kein
+Master mehr pollt. Für die Direktvermarktung empfohlen (z. B. 5 min).
+
 ### Vorlagen
 
 Vorbereitete Registerbelegungen lassen sich über den Popup-Button „Vorlage laden…" in die

@@ -33,6 +33,10 @@ class ModbusTCPSlave extends IPSModule
     // Datenpaket "Erweitert (Socket)": gerichtetes Senden an einen Client
     private const TX_DATA_ID = '{C8792760-65CF-4C53-B5C7-A30FCC84FEFE}';
 
+    // Instanzstatus (sichtbar ohne Log-Zugriff, siehe form.json "status")
+    private const STATUS_NO_SOCKET = 201;  // Server Socket nicht aktiv
+    private const STATUS_NO_TRAFFIC = 202; // Kommunikationsüberwachung ausgelöst
+
     public function Create()
     {
         //Never delete this line!
@@ -42,6 +46,8 @@ class ModbusTCPSlave extends IPSModule
 
         $this->RegisterPropertyInteger('UnitID', 1);
         $this->RegisterPropertyBoolean('CheckUnitID', true);
+        // Minuten ohne Modbus-Anfrage bis Fehlerstatus (0 = Überwachung aus)
+        $this->RegisterPropertyInteger('CommTimeout', 0);
         $this->RegisterPropertyBoolean('SwapWords', false);
         $this->RegisterPropertyInteger('UnmappedRead', MBSLVModbusServer::UNMAPPED_ZERO);
         $this->RegisterPropertyString('Registers', '[]');
@@ -58,6 +64,7 @@ class ModbusTCPSlave extends IPSModule
         $this->RegisterAttributeString('ScratchValues', '{}');
 
         $this->RegisterTimer('Expire', 0, 'MBSLV_CheckExpire($_IPS[\'TARGET\']);');
+        $this->RegisterTimer('Watch', 0, 'MBSLV_Watch($_IPS[\'TARGET\']);');
     }
 
     public function Destroy()
@@ -72,6 +79,9 @@ class ModbusTCPSlave extends IPSModule
         parent::ApplyChanges();
 
         $this->ensureProfiles();
+
+        // Sichtbare Kommunikationsanzeige, unabhängig vom RPC-Profil
+        $this->registerVarOnce('int', 'LastRequest', 'Letzte Modbus-Anfrage', '~UnixTimestamp', 5);
 
         if ($this->ReadPropertyBoolean('RPCEnabled')) {
             // nur bei echter Neuanlage registrieren (SUITE.md-Stolperstein 3)
@@ -102,7 +112,8 @@ class ModbusTCPSlave extends IPSModule
             $this->SetTimerInterval('Expire', 0);
         }
 
-        $this->SetStatus(IS_ACTIVE);
+        $this->SetTimerInterval('Watch', 60000);
+        $this->UpdateHealth();
     }
 
     /**
@@ -141,6 +152,7 @@ class ModbusTCPSlave extends IPSModule
             return '';
         }
 
+        $this->noteRequest();
         $server = $this->buildServer();
         foreach ($frames as $frame) {
             $response = $server->process($frame);
@@ -157,6 +169,14 @@ class ModbusTCPSlave extends IPSModule
             ]));
         }
         return '';
+    }
+
+    /**
+     * Timer-Callback (minütlich): aktualisiert die Statusampel der Instanz.
+     */
+    public function Watch(): void
+    {
+        $this->UpdateHealth();
     }
 
     /**
@@ -388,6 +408,46 @@ class ModbusTCPSlave extends IPSModule
     // ---------------------------------------------------------------------
     // interner Teil
     // ---------------------------------------------------------------------
+
+    /** Eingehende gültige Modbus-Frames als Lebenszeichen verbuchen */
+    private function noteRequest(): void
+    {
+        $now = time();
+        // Schreiblast begrenzen: bei 1-s-Polling nicht jede Anfrage persistieren
+        if ($now - (int) $this->GetValue('LastRequest') >= 5) {
+            $this->SetValue('LastRequest', $now);
+        }
+        $this->setStatusIfChanged(IS_ACTIVE);
+    }
+
+    /**
+     * Statusampel: Socket-Zustand und Kommunikationsüberwachung in den
+     * Instanzstatus spiegeln, damit Störungen ohne Log-Zugriff sichtbar sind.
+     */
+    private function UpdateHealth(): void
+    {
+        $parent = IPS_GetInstance($this->InstanceID)['ConnectionID'];
+        if ($parent === 0 || IPS_GetInstance($parent)['InstanceStatus'] !== IS_ACTIVE) {
+            $this->setStatusIfChanged(self::STATUS_NO_SOCKET);
+            return;
+        }
+        $timeout = $this->ReadPropertyInteger('CommTimeout');
+        if ($timeout > 0) {
+            $last = (int) $this->GetValue('LastRequest');
+            if (time() - $last > $timeout * 60) {
+                $this->setStatusIfChanged(self::STATUS_NO_TRAFFIC);
+                return;
+            }
+        }
+        $this->setStatusIfChanged(IS_ACTIVE);
+    }
+
+    private function setStatusIfChanged(int $status): void
+    {
+        if (IPS_GetInstance($this->InstanceID)['InstanceStatus'] !== $status) {
+            $this->SetStatus($status);
+        }
+    }
 
     /**
      * Variable nur bei echter Neuanlage registrieren (SUITE.md-Stolperstein 3:
