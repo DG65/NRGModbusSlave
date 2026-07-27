@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.0 (2026-07-27)
+
+- Neue Vorlage: SunSpec Zähler dreiphasig (Common Model 1 + Model 213, float32) - IPS kann damit gegenüber Wallbox-/EMS-Systemen (z. B. evcc, openWB) als SunSpec-Netzzähler auftreten. Registerlayout generiert aus der offiziellen SunSpec-Modelldefinition (github.com/sunspec/models)
+
 ## 1.5.0 (2026-07-27)
 
 - Statusampel (Verbund-Zielbild "Zuverlässigkeit ohne KI-Krücke"): Instanzstatus spiegelt jetzt sichtbar den Betriebszustand - Fehlerstatus 201 bei inaktivem Server Socket, Fehlerstatus 202 wenn innerhalb der konfigurierbaren Kommunikationsüberwachung (Minuten, 0 = aus) keine Modbus-Anfrage eintraf ("Master pollt nicht mehr")

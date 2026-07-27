@@ -184,7 +184,8 @@
             "value": "rpc",
             "options": [
               { "caption": "Meteocontrol blue'Log RPC (Direktvermarktung)", "value": "rpc" },
-              { "caption": "SunSpec Wechselrichter dreiphasig (Model 1 + 113, float)", "value": "sunspec113" }
+              { "caption": "SunSpec Wechselrichter dreiphasig (Model 1 + 113, float)", "value": "sunspec113" },
+              { "caption": "SunSpec Zähler dreiphasig (Model 1 + 213, float)", "value": "sunspec213" }
             ]
           }
         ],

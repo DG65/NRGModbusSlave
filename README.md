@@ -67,6 +67,10 @@ Tabelle übernehmen (inklusive passender Word-Order); gespeichert wird erst mit 
   emuliert einen SunSpec-konformen WR für Logger/Parkregler; die float-Modelle kommen ohne
   Skalierungsfaktoren aus. Die Textfelder des Common Models (Hersteller/Seriennummer) liefern 0,
   Strings unterstützt das Modul nicht.
+- **SunSpec Zähler dreiphasig** (Common Model 1 + Model 213, float32, Basis 40000) – IPS tritt
+  gegenüber Wallbox-/EMS-Systemen (z. B. evcc, openWB) als SunSpec-Netzzähler auf; wichtigste
+  Zuordnungen sind W (Wirkleistung, Export positiv) und TotWhImp/TotWhExp. Layout generiert aus
+  der offiziellen SunSpec-Modelldefinition.
 
 Weitere Vorlagen sind nach demselben Muster ergänzbar.
 

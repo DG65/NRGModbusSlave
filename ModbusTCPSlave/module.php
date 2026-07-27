@@ -259,6 +259,13 @@ class ModbusTCPSlave extends IPSModule
                 echo "SunSpec-Vorlage geladen (Word-Order ABCD gesetzt): Common Model 1 + Wechselrichter Model 113 (dreiphasig, float32) ab Basisregister 40000. Bitte Messwert-Variablen zuordnen, Unit-ID an die Gegenstelle anpassen (üblich 1 oder 126) und mit 'Änderungen übernehmen' speichern. Hinweis: Die Textfelder des Common Models (Hersteller/Modell/Seriennummer) liefern 0 - Strings unterstützt das Modul nicht.";
                 return;
 
+            case 'sunspec213':
+                $this->UpdateFormField('Registers', 'values', json_encode($this->templateRowsSunSpec213()));
+                $this->UpdateFormField('SwapWords', 'value', false);
+                $this->UpdateFormField('CheckUnitID', 'value', true);
+                echo "SunSpec-Vorlage geladen (Word-Order ABCD gesetzt): Common Model 1 + Zähler Model 213 (dreiphasig, float32) ab Basisregister 40000 - damit kann IPS z. B. gegenüber Wallbox-/EMS-Systemen (evcc, openWB u. a.) als SunSpec-Netzzähler auftreten. Wichtigste Zuordnungen: W (Wirkleistung, Vorzeichen: Export positiv), TotWhImp/TotWhExp (Energiezähler). Nicht zugeordnete Detailpunkte liefern 0. Unit-ID an die Gegenstelle anpassen und mit 'Änderungen übernehmen' speichern.";
+                return;
+
             default:
                 echo 'Unbekannte Vorlage: ' . $Template;
         }
@@ -555,6 +562,92 @@ class ModbusTCPSlave extends IPSModule
         }
         $rows[] = $this->templateRow(40132, 'uint16', 'Endmodell - ID (0xFFFF)', 0, 65535.0);
         $rows[] = $this->templateRow(40133, 'uint16', 'Endmodell - Länge', 0, 0.0);
+        return $rows;
+    }
+
+    /**
+     * SunSpec: Common Model 1 + Zähler Model 213 (dreiphasig Wye, float32)
+     * ab Basisregister 40000, Word-Order ABCD. Registerlayout generiert aus
+     * der offiziellen Modelldefinition (github.com/sunspec/models, model_213.json).
+     */
+    private function templateRowsSunSpec213(): array
+    {
+        $rows = [
+            $this->templateRow(40000, 'uint32', 'SunSpec-Kennung "SunS"', 0, 1400204883.0),
+            $this->templateRow(40002, 'uint16', 'Common Model - ID', 0, 1.0),
+            $this->templateRow(40003, 'uint16', 'Common Model - Länge', 0, 66.0),
+            $this->templateRow(40070, 'uint16', 'Model 213 - ID (Zähler dreiphasig, float)', 0, 213.0),
+            $this->templateRow(40071, 'uint16', 'Model 213 - Länge', 0, 124.0)
+        ];
+        $points = [
+            [40072, 'A - Strom gesamt (A)'],
+            [40074, 'AphA - Strom L1 (A)'],
+            [40076, 'AphB - Strom L2 (A)'],
+            [40078, 'AphC - Strom L3 (A)'],
+            [40080, 'PhV - Spannung L-N Mittel (V)'],
+            [40082, 'PhVphA - Spannung L1-N (V)'],
+            [40084, 'PhVphB - Spannung L2-N (V)'],
+            [40086, 'PhVphC - Spannung L3-N (V)'],
+            [40088, 'PPV - Spannung L-L Mittel (V)'],
+            [40090, 'PPVphAB - Spannung L1-L2 (V)'],
+            [40092, 'PPVphBC - Spannung L2-L3 (V)'],
+            [40094, 'PPVphCA - Spannung L3-L1 (V)'],
+            [40096, 'Hz - Netzfrequenz (Hz)'],
+            [40098, 'W - Wirkleistung gesamt (W, Export positiv)'],
+            [40100, 'WphA - Wirkleistung L1 (W)'],
+            [40102, 'WphB - Wirkleistung L2 (W)'],
+            [40104, 'WphC - Wirkleistung L3 (W)'],
+            [40106, 'VA - Scheinleistung gesamt (VA)'],
+            [40108, 'VAphA - Scheinleistung L1 (VA)'],
+            [40110, 'VAphB - Scheinleistung L2 (VA)'],
+            [40112, 'VAphC - Scheinleistung L3 (VA)'],
+            [40114, 'VAR - Blindleistung gesamt (var)'],
+            [40116, 'VARphA - Blindleistung L1 (var)'],
+            [40118, 'VARphB - Blindleistung L2 (var)'],
+            [40120, 'VARphC - Blindleistung L3 (var)'],
+            [40122, 'PF - Leistungsfaktor gesamt'],
+            [40124, 'PFphA - Leistungsfaktor L1'],
+            [40126, 'PFphB - Leistungsfaktor L2'],
+            [40128, 'PFphC - Leistungsfaktor L3'],
+            [40130, 'TotWhExp - Energie Export gesamt (Wh)'],
+            [40132, 'TotWhExpPhA - Energie Export L1 (Wh)'],
+            [40134, 'TotWhExpPhB - Energie Export L2 (Wh)'],
+            [40136, 'TotWhExpPhC - Energie Export L3 (Wh)'],
+            [40138, 'TotWhImp - Energie Import gesamt (Wh)'],
+            [40140, 'TotWhImpPhA - Energie Import L1 (Wh)'],
+            [40142, 'TotWhImpPhB - Energie Import L2 (Wh)'],
+            [40144, 'TotWhImpPhC - Energie Import L3 (Wh)'],
+            [40146, 'TotVAhExp - Scheinenergie Export (VAh)'],
+            [40148, 'TotVAhExpPhA - Scheinenergie Export L1 (VAh)'],
+            [40150, 'TotVAhExpPhB - Scheinenergie Export L2 (VAh)'],
+            [40152, 'TotVAhExpPhC - Scheinenergie Export L3 (VAh)'],
+            [40154, 'TotVAhImp - Scheinenergie Import (VAh)'],
+            [40156, 'TotVAhImpPhA - Scheinenergie Import L1 (VAh)'],
+            [40158, 'TotVAhImpPhB - Scheinenergie Import L2 (VAh)'],
+            [40160, 'TotVAhImpPhC - Scheinenergie Import L3 (VAh)'],
+            [40162, 'TotVArhImpQ1 - Blindenergie Import Q1 (varh)'],
+            [40164, 'TotVArhImpQ1phA - Blindenergie Import Q1 L1 (varh)'],
+            [40166, 'TotVArhImpQ1phB - Blindenergie Import Q1 L2 (varh)'],
+            [40168, 'TotVArhImpQ1phC - Blindenergie Import Q1 L3 (varh)'],
+            [40170, 'TotVArhImpQ2 - Blindenergie Import Q2 (varh)'],
+            [40172, 'TotVArhImpQ2phA - Blindenergie Import Q2 L1 (varh)'],
+            [40174, 'TotVArhImpQ2phB - Blindenergie Import Q2 L2 (varh)'],
+            [40176, 'TotVArhImpQ2phC - Blindenergie Import Q2 L3 (varh)'],
+            [40178, 'TotVArhExpQ3 - Blindenergie Export Q3 (varh)'],
+            [40180, 'TotVArhExpQ3phA - Blindenergie Export Q3 L1 (varh)'],
+            [40182, 'TotVArhExpQ3phB - Blindenergie Export Q3 L2 (varh)'],
+            [40184, 'TotVArhExpQ3phC - Blindenergie Export Q3 L3 (varh)'],
+            [40186, 'TotVArhExpQ4 - Blindenergie Export Q4 (varh)'],
+            [40188, 'TotVArhExpQ4phA - Blindenergie Export Q4 L1 (varh)'],
+            [40190, 'TotVArhExpQ4phB - Blindenergie Export Q4 L2 (varh)'],
+            [40192, 'TotVArhExpQ4phC - Blindenergie Export Q4 L3 (varh)']
+        ];
+        foreach ($points as [$addr, $name]) {
+            $rows[] = $this->templateRow($addr, 'float32', $name);
+        }
+        $rows[] = $this->templateRow(40194, 'uint32', 'Evt - Ereignisbits', 0, 0.0);
+        $rows[] = $this->templateRow(40196, 'uint16', 'Endmodell - ID (0xFFFF)', 0, 65535.0);
+        $rows[] = $this->templateRow(40197, 'uint16', 'Endmodell - Länge', 0, 0.0);
         return $rows;
     }
 
