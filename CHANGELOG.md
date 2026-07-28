@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.1 (2026-07-27)
+
+- Usability (Verbund-Audit): Immer sichtbare Verbindungszeile oben im Formular ("Erreichbar auf Port X" bzw. konkrete Anleitung, wenn der Server Socket nicht aktiv ist) - der Port lag bisher unauffindbar nur im eingeklappten Doku-Panel
+- RPC-Panel stellt jetzt klar, dass KEIN echtes blue'Log-Gerät benötigt wird (IPS übernimmt dessen Rolle; funktioniert mit jedem Direktvermarkter, der die blue'Log-RPC-Schnittstelle unterstützt)
+- Sichtbar dokumentiert, welche Register-Zuordnungen manuell erfolgen (Istwerte) und welche automatisch (Sollwert-Register über den Vorlage-Button) - stand bisher nur in einer flüchtigen Meldung nach dem Button-Klick
+
 ## 1.6.0 (2026-07-27)
 
 - Neue Vorlage: SunSpec Zähler dreiphasig (Common Model 1 + Model 213, float32) - IPS kann damit gegenüber Wallbox-/EMS-Systemen (z. B. evcc, openWB) als SunSpec-Netzzähler auftreten. Registerlayout generiert aus der offiziellen SunSpec-Modelldefinition (github.com/sunspec/models)

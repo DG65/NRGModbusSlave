@@ -212,7 +212,27 @@ class ModbusTCPSlave extends IPSModule
         // Das komplette RPC-Panel erscheint erst, wenn die RPC-Schnittstelle
         // (über die Vorlage im Popup) aktiviert wurde
         $this->setFormVisibility($form['elements'], array_merge(['RPCPanel'], self::RPC_FORM_FIELDS), $enabled);
+        foreach ($form['elements'] as &$element) {
+            if (($element['name'] ?? '') === 'PortInfo') {
+                $element['caption'] = $this->portInfoCaption();
+            }
+        }
+        unset($element);
         return json_encode($form);
+    }
+
+    /** Immer sichtbare Verbindungszeile: Wo lauscht dieser Slave, ist er erreichbar? */
+    private function portInfoCaption(): string
+    {
+        $parent = IPS_GetInstance($this->InstanceID)['ConnectionID'];
+        if ($parent === 0) {
+            return 'Nicht erreichbar: Es ist kein Server Socket als übergeordnete Instanz verbunden.';
+        }
+        $port = (int) IPS_GetProperty($parent, 'Port');
+        if (IPS_GetProperty($parent, 'Open') && IPS_GetInstance($parent)['InstanceStatus'] === IS_ACTIVE) {
+            return sprintf('Erreichbar: Dieser Modbus-TCP-Slave lauscht auf Port %d. Der Port wird auf der übergeordneten Server-Socket-Instanz eingestellt (Zahnrad neben der Instanz).', $port);
+        }
+        return sprintf('Nicht erreichbar: Der übergeordnete Server Socket (Port %d) ist nicht aktiv - dort Port einstellen und "Aktiv" einschalten.', $port);
     }
 
     private const RPC_FORM_FIELDS = ['RPCHintInternal', 'RPCSettingsRow', 'RPCForwardScript', 'RPCHintScript'];

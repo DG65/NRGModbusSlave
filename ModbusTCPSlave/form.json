@@ -1,6 +1,11 @@
 {
   "elements": [
     {
+      "type": "Label",
+      "name": "PortInfo",
+      "caption": "Verbindungsstatus wird beim Öffnen ermittelt..."
+    },
+    {
       "type": "ExpansionPanel",
       "caption": "📖 Doku",
       "expanded": false,
@@ -211,6 +216,10 @@
       "expanded": false,
       "items": [
         {
+          "type": "Label",
+          "caption": "IPS übernimmt hier selbst die Rolle des Meteocontrol blue'Log - es wird KEIN echtes blue'Log-Gerät benötigt. Funktioniert mit jedem Direktvermarkter, der die blue'Log-RPC-Schnittstelle unterstützt (z. B. Next Kraftwerke); ein vorhandener echter blue'Log kann dahinter weiterbetrieben werden (Weiterleitung per Ereignis-Skript)."
+        },
+        {
           "type": "CheckBox",
           "name": "RPCEnabled",
           "caption": "RPC-Schnittstelle (Register 5000/5006/5008) aktivieren",
@@ -219,7 +228,7 @@
         {
           "type": "Label",
           "name": "RPCHintInternal",
-          "caption": "Die Steuer-Register 5000 (Sollwert), 5002-5005, 5006 (Gültigkeitsdauer) und 5008 (Watchdog) verwaltet das Modul intern - sie erscheinen nicht in der Registertabelle. Die zugehörigen Istwert-Register lädt die Vorlage 'Meteocontrol blue'Log RPC'."
+          "caption": "Die Steuer-Register 5000 (Sollwert), 5002-5005, 5006 (Gültigkeitsdauer) und 5008 (Watchdog) verwaltet das Modul intern - sie erscheinen nicht in der Registertabelle. Zuordnung nach dem Laden der Vorlage: Die Istwert-Register (WR-Leistung, Netzleistung, P_AV) müssen MANUELL mit Variablen verknüpft werden; die Sollwert-Register 4/8/104/108 verknüpft der Vorlage-Button AUTOMATISCH mit 'Wirksamer DV-Sollwert', sobald die RPC-Variablen existieren (nach dem ersten 'Änderungen übernehmen' die Vorlage dafür einmal erneut laden)."
         },
         {
           "type": "RowLayout",
