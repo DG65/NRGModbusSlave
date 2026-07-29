@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.2 (2026-07-29)
+
+- Verbund-Namenskonvention: sichtbarer Bibliotheksname jetzt "NRG-Stack ModbusSlave", Instanzsuche findet zusätzlich "NRG-Stack Modbus TCP Slave" (nur Anzeigenamen - GUID, PHP-Klassenname und Idents unverändert, bestehende Instanzen und Git-Updates bleiben unberührt)
+
 ## 1.6.1 (2026-07-27)
 
 - Usability (Verbund-Audit): Immer sichtbare Verbindungszeile oben im Formular ("Erreichbar auf Port X" bzw. konkrete Anleitung, wenn der Server Socket nicht aktiv ist) - der Port lag bisher unauffindbar nur im eingeklappten Doku-Panel

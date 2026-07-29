@@ -1,10 +1,10 @@
 {
   "id": "{1C9B79B6-35D6-4381-907C-ADAE1FEAF307}",
-  "name": "NRGModbusSlave",
+  "name": "NRG-Stack ModbusSlave",
   "author": "DG65",
   "url": "https://github.com/DG65/NRGModbusSlave",
-  "version": "1.6.1",
-  "build": 12,
+  "version": "1.6.2",
+  "build": 13,
   "date": 0,
   "compatibility": {
     "version": "7.0"
