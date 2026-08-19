@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.3 (2026-08-19)
+
+- Verbund-Konvention README-Badges umgesetzt (Symcon/Version/Lizenz/PayPal unter der Überschrift; Modul-Version-Badge wird bei jedem Versions-Bump mitgepflegt). Der Check-Style-CI-Badge folgt zusammen mit dem Workflow, sobald das GitHub-Token mit workflow-Scope hinterlegt ist - gemäß Konvention kein Badge ohne echten Workflow
+
 ## 1.6.2 (2026-07-29)
 
 - Verbund-Namenskonvention: sichtbarer Bibliotheksname jetzt "NRG-Stack ModbusSlave", Instanzsuche findet zusätzlich "NRG-Stack Modbus TCP Slave" (nur Anzeigenamen - GUID, PHP-Klassenname und Idents unverändert, bestehende Instanzen und Git-Updates bleiben unberührt)
