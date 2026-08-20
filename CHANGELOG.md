@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.4 (2026-08-19)
+
+- Check-Style-CI nachgereicht (.github/workflows/check-style.yml: php -l über alle Dateien plus Protokollkern-Tests bei jedem Push/PR) und Check-Style-Badge in README ergänzt - Workflow-Scope-Blocker war zwischenzeitlich behoben
+
 ## 1.6.3 (2026-08-19)
 
 - Verbund-Konvention README-Badges umgesetzt (Symcon/Version/Lizenz/PayPal unter der Überschrift; Modul-Version-Badge wird bei jedem Versions-Bump mitgepflegt). Der Check-Style-CI-Badge folgt zusammen mit dem Workflow, sobald das GitHub-Token mit workflow-Scope hinterlegt ist - gemäß Konvention kein Badge ohne echten Workflow
