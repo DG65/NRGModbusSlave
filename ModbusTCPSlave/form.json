@@ -197,7 +197,7 @@
         "buttons": [
           {
             "caption": "In Tabelle laden",
-            "onClick": "MBSLV_LoadTemplate($id, $TemplateSelect);"
+            "onClick": "echo MBSLV_LoadTemplate($id, $TemplateSelect);"
           }
         ]
           }
@@ -205,7 +205,7 @@
         {
           "type": "Button",
           "caption": "Datenpunkte für unzugeordnete Register anlegen",
-          "onClick": "MBSLV_CreateRowVariables($id, json_encode($Registers));"
+          "onClick": "echo MBSLV_CreateRowVariables($id, json_encode($Registers));"
         }
       ]
     },
@@ -289,7 +289,7 @@
             {
               "type": "Button",
               "caption": "Instanzen anlegen",
-              "onClick": "MBSLV_CreateSiblings($id, $ClonePorts);"
+              "onClick": "echo MBSLV_CreateSiblings($id, $ClonePorts);"
             }
           ]
         }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.6 (2026-08-20)
+
+- Verbund-Audit "Sichtbare Rückmeldung bei jeder Aktion" (SUITE.md, verbindlich): die drei Formular-Buttons (Vorlage laden, Datenpunkte anlegen, weitere Schnittstellen anlegen) geben jetzt einen Ergebnistext mit ✅/⚠️/⛔-Präfix per `return` zurück; die onClick-Handler rufen explizit `echo Prefix_Methode(...)` auf statt sich auf internes Echo zu verlassen - macht die Rückmeldung robust und die Methoden zusätzlich per Skript testbar (Rückgabewert statt reinem Seiteneffekt)
+
 ## 1.6.5 (2026-08-20)
 
 - Verbindungs-Kopfzeile im Formular auf die verbundweite Status-Kopfzeilen-Konvention umgestellt: eine Zeile, Icon + Kernaussage + Zeitstempel statt Fließtext (✅ erreichbar mit Zeitpunkt der letzten Modbus-Anfrage, ⚠️ erreichbar aber noch keine Anfrage, ❌ Server Socket inaktiv, ℹ️ kein Socket verbunden). Erklärungstext zum Port bleibt im Doku-Panel, wo er bereits stand

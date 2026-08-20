@@ -258,11 +258,14 @@ class ModbusTCPSlave extends IPSModule
     /**
      * Popup-Button: lädt eine Registervorlage in die offene Konfiguration
      * (nur UpdateFormField - gespeichert wird erst durch den Nutzer über
-     * "Änderungen übernehmen").
+     * "Änderungen übernehmen"). Gibt einen Ergebnistext zurück (✅/⚠️/⛔-Präfix);
+     * der onClick-Handler in form.json lautet bewusst "echo MBSLV_LoadTemplate(...)",
+     * damit die Rückmeldung sofort als Popup sichtbar wird (SUITE.md-Konvention
+     * "Sichtbare Rückmeldung bei jeder Aktion").
      *
-     * @param string $Template 'rpc' | 'sunspec113'
+     * @param string $Template 'rpc' | 'sunspec113' | 'sunspec213'
      */
-    public function LoadTemplate(string $Template): void
+    public function LoadTemplate(string $Template): string
     {
         switch ($Template) {
             case 'rpc':
@@ -276,35 +279,32 @@ class ModbusTCPSlave extends IPSModule
                 $this->UpdateFormField('RPCPanel', 'expanded', true);
                 $this->UIToggleRPC(true);
                 if ($effective > 0) {
-                    echo "Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt, RPC-Schnittstelle aktiviert - Einstellungen siehe eingeblendetes Panel). Bitte die Istwert-Variablen (WR-Leistung, Netzleistung, P_AV) zuordnen und mit 'Änderungen übernehmen' speichern.";
-                } else {
-                    echo "Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt, RPC-Schnittstelle aktiviert - Einstellungen siehe eingeblendetes Panel). Nach 'Änderungen übernehmen' die Vorlage erneut laden, damit die Sollwert-Register (4/8/104/108) automatisch mit der Variable 'Wirksamer DV-Sollwert' verknüpft werden. Istwert-Variablen bitte manuell zuordnen.";
+                    return "✅ Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt, RPC-Schnittstelle aktiviert - Einstellungen siehe eingeblendetes Panel). Bitte die Istwert-Variablen (WR-Leistung, Netzleistung, P_AV) zuordnen und mit 'Änderungen übernehmen' speichern.";
                 }
-                return;
+                return "✅ Vorlage geladen (Unit-ID 10, Word-Order CDAB gesetzt, RPC-Schnittstelle aktiviert - Einstellungen siehe eingeblendetes Panel). Nach 'Änderungen übernehmen' die Vorlage erneut laden, damit die Sollwert-Register (4/8/104/108) automatisch mit der Variable 'Wirksamer DV-Sollwert' verknüpft werden. Istwert-Variablen bitte manuell zuordnen.";
 
             case 'sunspec113':
                 $this->UpdateFormField('Registers', 'values', json_encode($this->templateRowsSunSpec113()));
                 $this->UpdateFormField('SwapWords', 'value', false);
                 $this->UpdateFormField('CheckUnitID', 'value', true);
-                echo "SunSpec-Vorlage geladen (Word-Order ABCD gesetzt): Common Model 1 + Wechselrichter Model 113 (dreiphasig, float32) ab Basisregister 40000. Bitte Messwert-Variablen zuordnen, Unit-ID an die Gegenstelle anpassen (üblich 1 oder 126) und mit 'Änderungen übernehmen' speichern. Hinweis: Die Textfelder des Common Models (Hersteller/Modell/Seriennummer) liefern 0 - Strings unterstützt das Modul nicht.";
-                return;
+                return "✅ SunSpec-Vorlage geladen (Word-Order ABCD gesetzt): Common Model 1 + Wechselrichter Model 113 (dreiphasig, float32) ab Basisregister 40000. Bitte Messwert-Variablen zuordnen, Unit-ID an die Gegenstelle anpassen (üblich 1 oder 126) und mit 'Änderungen übernehmen' speichern. Hinweis: Die Textfelder des Common Models (Hersteller/Modell/Seriennummer) liefern 0 - Strings unterstützt das Modul nicht.";
 
             case 'sunspec213':
                 $this->UpdateFormField('Registers', 'values', json_encode($this->templateRowsSunSpec213()));
                 $this->UpdateFormField('SwapWords', 'value', false);
                 $this->UpdateFormField('CheckUnitID', 'value', true);
-                echo "SunSpec-Vorlage geladen (Word-Order ABCD gesetzt): Common Model 1 + Zähler Model 213 (dreiphasig, float32) ab Basisregister 40000 - damit kann IPS z. B. gegenüber Wallbox-/EMS-Systemen (evcc, openWB u. a.) als SunSpec-Netzzähler auftreten. Wichtigste Zuordnungen: W (Wirkleistung, Vorzeichen: Export positiv), TotWhImp/TotWhExp (Energiezähler). Nicht zugeordnete Detailpunkte liefern 0. Unit-ID an die Gegenstelle anpassen und mit 'Änderungen übernehmen' speichern.";
-                return;
+                return "✅ SunSpec-Vorlage geladen (Word-Order ABCD gesetzt): Common Model 1 + Zähler Model 213 (dreiphasig, float32) ab Basisregister 40000 - damit kann IPS z. B. gegenüber Wallbox-/EMS-Systemen (evcc, openWB u. a.) als SunSpec-Netzzähler auftreten. Wichtigste Zuordnungen: W (Wirkleistung, Vorzeichen: Export positiv), TotWhImp/TotWhExp (Energiezähler). Nicht zugeordnete Detailpunkte liefern 0. Unit-ID an die Gegenstelle anpassen und mit 'Änderungen übernehmen' speichern.";
 
             default:
-                echo 'Unbekannte Vorlage: ' . $Template;
+                return '⛔ Unbekannte Vorlage: ' . $Template;
         }
     }
 
-    /** Abwärtskompatibler Alias (Button bis v1.1.0) */
+    /** Abwärtskompatibler Alias (Button bis v1.1.0) - echot selbst, falls ein noch
+     *  gecachtes altes Formular ihn ohne führendes echo aufruft. */
     public function LoadRPCProfile(): void
     {
-        $this->LoadTemplate('rpc');
+        echo $this->LoadTemplate('rpc');
     }
 
     /**
@@ -313,16 +313,16 @@ class ModbusTCPSlave extends IPSModule
      * in die Tabelle ein. Zeilen mit Festwert ungleich 0 (Header/Konstanten,
      * z. B. SunSpec-Modell-IDs) bleiben unangetastet. Wiederholtes Ausführen
      * ist unschädlich - vorhandene Datenpunkte werden wiederverwendet.
+     * Rückgabe als Ergebnistext (✅/⚠️-Präfix), form.json ruft "echo MBSLV_..." auf.
      */
-    public function CreateRowVariables(string $RowsJson): void
+    public function CreateRowVariables(string $RowsJson): string
     {
         $rows = json_decode($RowsJson, true);
         if (is_string($rows)) { // doppelt kodiert angeliefert
             $rows = json_decode($rows, true);
         }
         if (!is_array($rows) || $rows === []) {
-            echo 'Die Registertabelle ist leer - zuerst Zeilen anlegen oder eine Vorlage laden.';
-            return;
+            return '⚠️ Die Registertabelle ist leer - zuerst Zeilen anlegen oder eine Vorlage laden.';
         }
 
         $created = 0;
@@ -353,12 +353,13 @@ class ModbusTCPSlave extends IPSModule
 
         $this->UpdateFormField('Registers', 'values', json_encode($rows));
 
-        $message = sprintf('%d Datenpunkt(e) angelegt, %d wiederverwendet und in die Tabelle eingetragen.', $created, $reused);
+        $icon = ($created + $reused) > 0 ? '✅' : '⚠️';
+        $message = sprintf('%s %d Datenpunkt(e) angelegt, %d wiederverwendet und in die Tabelle eingetragen.', $icon, $created, $reused);
         if ($skipped > 0) {
             $message .= sprintf(' %d Zeile(n) mit Festwert wurden übersprungen.', $skipped);
         }
         $message .= " Mit 'Änderungen übernehmen' speichern. Die Datenpunkte gehören zur Instanz und können per Ereignis/Skript aus beliebigen Quellen befüllt werden.";
-        echo $message;
+        return $message;
     }
 
     /**
@@ -367,8 +368,9 @@ class ModbusTCPSlave extends IPSModule
      * Ports, auf denen bereits eine ModbusTCPSlave-Instanz lauscht (inklusive
      * dieser), werden übersprungen. Die neuen Instanzen sind vollständige
      * Kopien der GESPEICHERTEN Konfiguration dieser Instanz.
+     * Rückgabe als Ergebnistext (✅/⚠️-Präfix), form.json ruft "echo MBSLV_..." auf.
      */
-    public function CreateSiblings(string $Ports): void
+    public function CreateSiblings(string $Ports): string
     {
         $ports = [];
         foreach (explode(',', $Ports) as $part) {
@@ -383,8 +385,7 @@ class ModbusTCPSlave extends IPSModule
         }
         $ports = array_values(array_unique(array_filter($ports, fn ($p) => $p > 0 && $p <= 65535)));
         if ($ports === []) {
-            echo "Keine gültigen Ports angegeben. Beispiele: '502-505' oder '502,503,1502'.";
-            return;
+            return "⚠️ Keine gültigen Ports angegeben. Beispiele: '502-505' oder '502,503,1502'.";
         }
 
         // bereits belegte Ports aller ModbusTCPSlave-Instanzen ermitteln
@@ -431,6 +432,7 @@ class ModbusTCPSlave extends IPSModule
             $created[] = $port;
         }
 
+        $icon = $created !== [] ? '✅' : '⚠️';
         $message = [];
         if ($created !== []) {
             $message[] = 'Angelegt: Port ' . implode(', ', $created) . '.';
@@ -439,7 +441,7 @@ class ModbusTCPSlave extends IPSModule
             $message[] = 'Übersprungen (bereits belegt): Port ' . implode(', ', $skipped) . '.';
         }
         $message[] = 'Hinweis: Kopiert wurde die zuletzt GESPEICHERTE Konfiguration dieser Instanz.';
-        echo implode("\n", $message);
+        return $icon . ' ' . implode("\n", $message);
     }
 
     // ---------------------------------------------------------------------
