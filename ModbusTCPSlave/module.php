@@ -221,18 +221,28 @@ class ModbusTCPSlave extends IPSModule
         return json_encode($form);
     }
 
-    /** Immer sichtbare Verbindungszeile: Wo lauscht dieser Slave, ist er erreichbar? */
+    /**
+     * Immer sichtbare Verbindungs-Kopfzeile: eine Zeile, Icon + Kernaussage +
+     * Zeitstempel (Stil analog zur verbundweiten Discovery-Kopfzeile-Konvention,
+     * SUITE.md "Einheitliche Verbund-Status-Kopfzeile") - Details/Anleitung
+     * stehen im Doku-Panel, nicht hier.
+     */
     private function portInfoCaption(): string
     {
         $parent = IPS_GetInstance($this->InstanceID)['ConnectionID'];
         if ($parent === 0) {
-            return 'Nicht erreichbar: Es ist kein Server Socket als übergeordnete Instanz verbunden.';
+            return 'ℹ️ Kein Server Socket verbunden.';
         }
         $port = (int) IPS_GetProperty($parent, 'Port');
-        if (IPS_GetProperty($parent, 'Open') && IPS_GetInstance($parent)['InstanceStatus'] === IS_ACTIVE) {
-            return sprintf('Erreichbar: Dieser Modbus-TCP-Slave lauscht auf Port %d. Der Port wird auf der übergeordneten Server-Socket-Instanz eingestellt (Zahnrad neben der Instanz).', $port);
+        if (!IPS_GetProperty($parent, 'Open') || IPS_GetInstance($parent)['InstanceStatus'] !== IS_ACTIVE) {
+            return sprintf('❌ Server Socket nicht aktiv (Port %d).', $port);
         }
-        return sprintf('Nicht erreichbar: Der übergeordnete Server Socket (Port %d) ist nicht aktiv - dort Port einstellen und "Aktiv" einschalten.', $port);
+        $lastRequestID = (int) @$this->GetIDForIdent('LastRequest');
+        $last = $lastRequestID > 0 ? (int) GetValue($lastRequestID) : 0;
+        if ($last === 0) {
+            return sprintf('⚠️ Erreichbar auf Port %d (noch keine Anfrage empfangen).', $port);
+        }
+        return sprintf('✅ Erreichbar auf Port %d (zuletzt %s Uhr).', $port, date('H:i:s', $last));
     }
 
     private const RPC_FORM_FIELDS = ['RPCHintInternal', 'RPCSettingsRow', 'RPCForwardScript', 'RPCHintScript'];

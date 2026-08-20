@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.5 (2026-08-20)
+
+- Verbindungs-Kopfzeile im Formular auf die verbundweite Status-Kopfzeilen-Konvention umgestellt: eine Zeile, Icon + Kernaussage + Zeitstempel statt Fließtext (✅ erreichbar mit Zeitpunkt der letzten Modbus-Anfrage, ⚠️ erreichbar aber noch keine Anfrage, ❌ Server Socket inaktiv, ℹ️ kein Socket verbunden). Erklärungstext zum Port bleibt im Doku-Panel, wo er bereits stand
+
 ## 1.6.4 (2026-08-19)
 
 - Check-Style-CI nachgereicht (.github/workflows/check-style.yml: php -l über alle Dateien plus Protokollkern-Tests bei jedem Push/PR) und Check-Style-Badge in README ergänzt - Workflow-Scope-Blocker war zwischenzeitlich behoben
