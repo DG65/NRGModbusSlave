@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.7 (2026-08-20)
+
+- Neu: Button "🔄 Übernehmen erzwingen (ohne Formularänderung)" - ruft direkt IPS_ApplyChanges() auf, praktisch nach jedem Modul-Update, um neue Variablen/Zeitgeber ohne Formularänderung nachzuziehen (Vorschlag aus dem Verbund, EMS-Modul)
+
 ## 1.6.6 (2026-08-20)
 
 - Verbund-Audit "Sichtbare Rückmeldung bei jeder Aktion" (SUITE.md, verbindlich): die drei Formular-Buttons (Vorlage laden, Datenpunkte anlegen, weitere Schnittstellen anlegen) geben jetzt einen Ergebnistext mit ✅/⚠️/⛔-Präfix per `return` zurück; die onClick-Handler rufen explizit `echo Prefix_Methode(...)` auf statt sich auf internes Echo zu verlassen - macht die Rückmeldung robust und die Methoden zusätzlich per Skript testbar (Rückgabewert statt reinem Seiteneffekt)

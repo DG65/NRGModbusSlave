@@ -269,6 +269,20 @@
   ],
   "actions": [
     {
+      "type": "RowLayout",
+      "items": [
+        {
+          "type": "Label",
+          "caption": "Nach einem Modul-Update übernimmt die Instanz neue Variablen/Zeitgeber erst nach 'Änderungen übernehmen' - dieser Button erzwingt das ohne Formularänderung."
+        },
+        {
+          "type": "Button",
+          "caption": "🔄 Übernehmen erzwingen (ohne Formularänderung)",
+          "onClick": "IPS_ApplyChanges($id); echo '✅ ApplyChanges() ausgeführt.';"
+        }
+      ]
+    },
+    {
       "type": "ExpansionPanel",
       "caption": "🧩 Weitere Schnittstellen anlegen",
       "expanded": false,
