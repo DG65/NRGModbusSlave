@@ -59,7 +59,17 @@ class ModbusTCPSlave extends IPSModule
         $this->RegisterPropertyInteger('RPCForwardScript', 0);
 
         // Zuletzt geschriebener Watchdog-Wert (Register 5008) und die laut
-        // Datenblatt ab FW 16.0.4 les-/schreibbaren Reserve-Register 5002-5005
+        // Datenblatt ab FW 16.0.4 les-/schreibbaren Reserve-Register 5002-5005.
+        // Register 5002 heißt auf realer blue'Log-Hardware PPC_P_SET_RPC_ABS
+        // (absoluter Watt-Sollwert, Geschwister von 5000/REL) - im öffentlichen
+        // Datenblatt nur als "reserviert" ohne Namen geführt. Bestätigt an einer
+        // echten Anlage (Solarpark Hofweier, 01.09.2026 via EMS-Sitzung): dort
+        // schreibt die Park-Steuerung AUSSCHLIESSLICH auf ABS, REL bleibt
+        // unangetastet - keine Priorisierungslogik zwischen beiden beobachtet.
+        // Wir speichern 5002 hier bewusst nur als Passthrough (kein Effekt auf
+        // Setpoint/Effective) - eine Verknüpfung mit ABS wäre erst sinnvoll,
+        // wenn geklärt ist, ob ein externer Direktvermarkter auch ABS statt
+        // REL in UNSERE Slave-Emulation schreiben könnte (offen, siehe Memory).
         $this->RegisterAttributeFloat('WatchdogValue', 0.0);
         $this->RegisterAttributeString('ScratchValues', '{}');
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.8 (2026-09-01)
+
+- Dokumentation (keine Verhaltensänderung): Register 5002 als PPC_P_SET_RPC_ABS (absoluter Watt-Sollwert, Geschwister von 5000/REL) benannt und mit einem an einer echten Anlage bestätigten Befund versehen - dort wird ausschließlich ABS geschrieben, REL bleibt unangetastet. Unser Modul behandelt 5002 weiterhin nur als Passthrough, bis geklärt ist, ob ein Direktvermarkter auch ABS statt REL in unsere Slave-Emulation schreiben könnte
+
 ## 1.6.7 (2026-08-20)
 
 - Neu: Button "🔄 Übernehmen erzwingen (ohne Formularänderung)" - ruft direkt IPS_ApplyChanges() auf, praktisch nach jedem Modul-Update, um neue Variablen/Zeitgeber ohne Formularänderung nachzuziehen (Vorschlag aus dem Verbund, EMS-Modul)
