@@ -1,7 +1,7 @@
 # NRG-Stack ModbusSlave
 
 ![Symcon](https://img.shields.io/badge/Symcon-PHPModul-blue)
-![Modul Version](https://img.shields.io/badge/Modul_Version-1.6.8-blue)
+![Modul Version](https://img.shields.io/badge/Modul_Version-1.7.0-blue)
 ![Symcon Version](https://img.shields.io/badge/Symcon_Version-7.0%2B-blue)
 ![License](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-lightgrey)
 [![Check Style](https://github.com/DG65/NRGModbusSlave/actions/workflows/check-style.yml/badge.svg)](https://github.com/DG65/NRGModbusSlave/actions/workflows/check-style.yml)
@@ -50,9 +50,34 @@ Die Word-Reihenfolge bei Mehrwort-Typen ist umschaltbar (ABCD/CDAB).
 
 **Registertabelle:** Pro Zeile Adresse (0-basiert), Bereich (Holding/Input), Datentyp,
 IPS-Variable, Skalierungsfaktor, optionaler Festwert (wenn keine Variable zugeordnet ist) und
-Schreibbar-Flag. Beim Schreiben wird `RequestAction` verwendet, wenn die Zielvariable eine
-Aktion besitzt, sonst `SetValue`. Dieselbe Variable darf mehrfach gemappt werden (z. B. float32-
-und int32-Darstellung parallel).
+Schreibmodus. Dieselbe Variable darf mehrfach gemappt werden (z. B. float32- und
+int32-Darstellung parallel).
+
+**Schreibmodus (Spalte „Schreiben"):**
+
+| Modus | Verhalten |
+|-------|-----------|
+| Nein | Master darf nur lesen; Schreibversuche werden quittiert, aber verworfen |
+| Ja – Aktion | `RequestAction`, falls die Variable eine Aktion besitzt (z. B. um einen Aktor zu schalten), sonst `SetValue` |
+| Ja – direkt | immer `SetValue`; die Aktion der Variable wird bewusst nicht ausgelöst – nötig für Variablen fremder Instanzen (z. B. ModBus-Device-Register), deren Aktion sonst in ein anderes Gerät schreiben würde |
+
+### Bestehenden Modbus-Slave ersetzen (Simulator, SPS)
+
+Soll dieses Modul einen vorhandenen Slave ablösen (z. B. einen Simulator wie ModRSsim2, über den
+ein Direktvermarkter oder Leitsystem bislang angebunden war):
+
+1. **Registertabelle 1:1 nachbilden** – Adressen, Datentypen, Word-Order und Unit-ID vom alten
+   Slave übernehmen. Ist die Unit-ID des Masters nicht sicher bekannt, „Anfragen an fremde
+   Unit-IDs ablehnen" zunächst ausschalten (das Debug-Fenster zeigt die tatsächlich verwendete).
+2. **Dieselben IPS-Variablen verknüpfen** wie bisher, damit vorhandene Skripte und Ereignisse
+   unverändert weiterlaufen. Gehören die Variablen einer anderen Instanz (typisch: einem
+   ModBus-Device, das bisher den alten Slave bedient hat), Schreibmodus **„Ja – direkt"** wählen.
+3. **Umschalten:** alten Slave auf diesem Port stoppen, dann den Server Socket dieser Instanz
+   auf demselben Port öffnen. Läuft IPS auf einem anderen Rechner als der alte Slave, muss der
+   Master (bzw. dessen VPN/NAT) auf die IPS-Adresse umgestellt werden.
+4. **Kontrolle:** Verbindungszeile oben im Formular („zuletzt … Uhr" läuft im Polltakt des
+   Masters weiter) und Debug-Fenster der Instanz. Rückweg jederzeit: Server Socket schließen,
+   alten Slave starten.
 
 **Unbelegte Register:** Fragt ein Master eine Adresse ohne Tabellenzeile an, liefert das Modul
 wahlweise 0 (tolerant, Standard – sinnvoll, wenn Master ganze Blöcke lesen) oder eine

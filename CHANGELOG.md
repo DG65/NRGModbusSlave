@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.0 (2026-09-03)
+
+- Neu: dreistufiger Schreibmodus je Registerzeile (Spalte "Schreiben": Nein / Ja - Aktion / Ja - direkt). "Direkt" schreibt immer per SetValue und umgeht die Aktion der Variable - nötig, wenn die verknüpfte Variable einer anderen Instanz gehört (typisch: Register eines ModBus-Device beim Ersatz eines bisherigen Slaves), deren Aktion sonst versuchen würde, den Wert in ein fremdes Gerät zu schreiben. Bestehende Konfigurationen (true/false) werden automatisch als Ja-Aktion/Nein gelesen
+- Doku: Anleitung "Bestehenden Modbus-Slave ersetzen" (Simulator wie ModRSsim2, SPS) im Formular und README - Registertabelle 1:1 nachbilden, gleiche Variablen verknüpfen, Port übernehmen, Rückweg
+
 ## 1.6.8 (2026-09-01)
 
 - Dokumentation (keine Verhaltensänderung): Register 5002 als PPC_P_SET_RPC_ABS (absoluter Watt-Sollwert, Geschwister von 5000/REL) benannt und mit einem an einer echten Anlage bestätigten Befund versehen - dort wird ausschließlich ABS geschrieben, REL bleibt unangetastet. Unser Modul behandelt 5002 weiterhin nur als Passthrough, bis geklärt ist, ob ein Direktvermarkter auch ABS statt REL in unsere Slave-Emulation schreiben könnte

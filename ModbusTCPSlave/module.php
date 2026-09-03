@@ -37,6 +37,12 @@ class ModbusTCPSlave extends IPSModule
     private const STATUS_NO_SOCKET = 201;  // Server Socket nicht aktiv
     private const STATUS_NO_TRAFFIC = 202; // Kommunikationsüberwachung ausgelöst
 
+    // Schreibmodus je Registerzeile (Spalte "Writable"; ältere Konfigurationen
+    // speichern dort noch true/false, das wird auf 1/0 normalisiert)
+    private const WRITE_NONE = 0;   // nur lesen
+    private const WRITE_ACTION = 1; // RequestAction, falls die Variable eine Aktion hat, sonst SetValue
+    private const WRITE_DIRECT = 2; // immer SetValue, Aktion der Variable bewusst nicht auslösen
+
     public function Create()
     {
         //Never delete this line!
@@ -226,9 +232,38 @@ class ModbusTCPSlave extends IPSModule
             if (($element['name'] ?? '') === 'PortInfo') {
                 $element['caption'] = $this->portInfoCaption();
             }
+            // Registertabelle mit normalisiertem Schreibmodus anzeigen (ältere
+            // Konfigurationen speichern true/false statt 0/1/2); die Liste bleibt
+            // an die Property gebunden, gespeichert wird weiterhin regulär
+            if (($element['name'] ?? '') === 'Registers') {
+                $element['loadValuesFromConfiguration'] = false;
+                $element['values'] = $this->registersForForm();
+            }
         }
         unset($element);
         return json_encode($form);
+    }
+
+    /** Gespeicherte Registerzeilen mit normalisierter Spalte "Writable" (0/1/2) */
+    private function registersForForm(): array
+    {
+        $rows = json_decode($this->ReadPropertyString('Registers'), true);
+        if (!is_array($rows)) {
+            return [];
+        }
+        foreach ($rows as &$row) {
+            $row['Writable'] = self::normalizeWriteMode($row['Writable'] ?? 0);
+        }
+        unset($row);
+        return $rows;
+    }
+
+    private static function normalizeWriteMode($value): int
+    {
+        if (is_bool($value)) {
+            return $value ? self::WRITE_ACTION : self::WRITE_NONE;
+        }
+        return max(self::WRITE_NONE, min(self::WRITE_DIRECT, (int) $value));
     }
 
     /**
@@ -533,7 +568,7 @@ class ModbusTCPSlave extends IPSModule
     private function templateRow(int $addr, string $type, string $name, int $variable = 0, float $fixed = 0.0): array
     {
         return ['Name' => $name, 'Area' => 0, 'Address' => $addr, 'DataType' => $type,
-            'VariableID' => $variable, 'Factor' => 1.0, 'Fixed' => $fixed, 'Writable' => false];
+            'VariableID' => $variable, 'Factor' => 1.0, 'Fixed' => $fixed, 'Writable' => self::WRITE_NONE];
     }
 
     /** Meteocontrol blue'Log RPC: Istwert-Register (Datenblatt 05-2020) */
@@ -709,7 +744,7 @@ class ModbusTCPSlave extends IPSModule
                 'VariableID' => (int) ($row['VariableID'] ?? 0),
                 'Factor'     => $factor == 0.0 ? 1.0 : $factor,
                 'Fixed'      => (float) ($row['Fixed'] ?? 0.0),
-                'Writable'   => (bool) ($row['Writable'] ?? false)
+                'Writable'   => self::normalizeWriteMode($row['Writable'] ?? 0)
             ];
         }
 
@@ -802,8 +837,11 @@ class ModbusTCPSlave extends IPSModule
             default:
                 $target = $scaled;
         }
-        $hasAction = ($info['VariableCustomAction'] > 0) || ($info['VariableAction'] > 0);
-        $this->SendDebug('Schreiben', sprintf('Register %d -> Variable #%d = %s (%s)', $row['Address'], $variable, json_encode($target), $hasAction ? 'RequestAction' : 'SetValue'), 0);
+        // Schreibmodus "direkt": Aktion der Variable bewusst umgehen (z. B. Register
+        // eines ModBus-Device, dessen Aktion sonst in ein anderes Gerät schreiben würde)
+        $direct = ((int) ($row['Writable'] ?? 0)) === self::WRITE_DIRECT;
+        $hasAction = !$direct && (($info['VariableCustomAction'] > 0) || ($info['VariableAction'] > 0));
+        $this->SendDebug('Schreiben', sprintf('Register %d -> Variable #%d = %s (%s)', $row['Address'], $variable, json_encode($target), $direct ? 'SetValue, direkt' : ($hasAction ? 'RequestAction' : 'SetValue')), 0);
         if ($hasAction) {
             @RequestAction($variable, $target);
         } else {

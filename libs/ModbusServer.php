@@ -18,7 +18,8 @@ declare(strict_types=1);
  *   Area      0 = Holding, 1 = Input
  *   Address   0-basierte Protokolladresse des ersten Words
  *   DataType  uint16 | int16 | uint32 | int32 | float32 | float64
- *   Writable  true = per FC 06/16 beschreibbar
+ *   Writable  0/false = nur lesen; 1/true bzw. 2 = per FC 06/16 beschreibbar
+ *             (die Unterscheidung 1 = Aktion / 2 = direkt trifft der Writer-Callback)
  *   (weitere Schlüssel wie VariableID/Factor/Fixed/Ident werden unverändert an
  *    die Reader-/Writer-Callbacks durchgereicht)
  *

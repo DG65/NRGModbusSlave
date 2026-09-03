@@ -16,7 +16,15 @@
         },
         {
           "type": "Label",
-          "caption": "Registertabelle: Jede Zeile bildet einen Wert ab. 'Adresse' ist die 0-basierte Protokolladresse des ersten Words; Mehrwort-Typen (int32/uint32/float32 = 2 Words, float64 = 4 Words) belegen die Folgeadressen. 'Faktor' skaliert von der Variable zum Register (Registerwert = Variablenwert x Faktor; beim Schreiben umgekehrt). Ist keine Variable zugeordnet, wird der 'Festwert' geliefert. Nur Zeilen mit 'Schreibbar' akzeptieren FC 06/16; besitzt die Zielvariable eine Aktion, wird RequestAction verwendet, sonst SetValue."
+          "caption": "Registertabelle: Jede Zeile bildet einen Wert ab. 'Adresse' ist die 0-basierte Protokolladresse des ersten Words; Mehrwort-Typen (int32/uint32/float32 = 2 Words, float64 = 4 Words) belegen die Folgeadressen. 'Faktor' skaliert von der Variable zum Register (Registerwert = Variablenwert x Faktor; beim Schreiben umgekehrt). Ist keine Variable zugeordnet, wird der 'Festwert' geliefert."
+        },
+        {
+          "type": "Label",
+          "caption": "Schreiben (Spalte 'Schreiben'): 'Nein' = der Master darf nur lesen (Schreibversuche werden quittiert, aber verworfen). 'Ja - Aktion' = ein vom Master geschriebener Wert wird per RequestAction an die Variable übergeben, falls sie eine Aktion besitzt (z. B. schaltet so ein Schreibzugriff einen Aktor), sonst per SetValue. 'Ja - direkt' = immer SetValue, die Aktion der Variable wird bewusst NICHT ausgelöst - nötig, wenn die Variable einer anderen Instanz gehört (z. B. ein Register eines ModBus-Device), deren Aktion sonst versuchen würde, den Wert in ein ganz anderes Gerät zu schreiben."
+        },
+        {
+          "type": "Label",
+          "caption": "Bestehenden Modbus-Slave ersetzen (z. B. Simulator wie ModRSsim2 oder eine SPS): 1) Registertabelle exakt wie beim alten Slave anlegen - Adressen, Datentypen, Word-Order und Unit-ID übernehmen, im Zweifel 'Anfragen an fremde Unit-IDs ablehnen' zunächst AUS lassen. 2) Dieselben IPS-Variablen wie bisher verknüpfen, damit vorhandene Skripte/Ereignisse unverändert weiterlaufen; gehören die Variablen einer anderen Instanz (typisch: ein bisheriges ModBus-Device, das den alten Slave bedient hat), Schreibmodus 'Ja - direkt' wählen. 3) Alten Slave auf diesem Port stoppen, dann den Server Socket dieser Instanz auf demselben Port öffnen. 4) Kontrolle über die Verbindungszeile oben ('zuletzt ... Uhr' muss im Polltakt des Masters weiterlaufen) und im Debug-Fenster der Instanz. Rückweg jederzeit: Server Socket schließen, alten Slave starten."
         },
         {
           "type": "Label",
@@ -161,11 +169,18 @@
           "edit": { "type": "NumberSpinner", "digits": 3 }
         },
         {
-          "caption": "Schreibbar",
+          "caption": "Schreiben",
           "name": "Writable",
-          "width": "95px",
-          "add": false,
-          "edit": { "type": "CheckBox" }
+          "width": "190px",
+          "add": 0,
+          "edit": {
+            "type": "Select",
+            "options": [
+              { "caption": "Nein (nur lesen)", "value": 0 },
+              { "caption": "Ja - Aktion (RequestAction)", "value": 1 },
+              { "caption": "Ja - direkt (SetValue)", "value": 2 }
+            ]
+          }
         }
       ]
     },

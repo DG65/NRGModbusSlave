@@ -18,8 +18,10 @@ ist die Registertabelle. Die blue'Log-RPC-Emulation ist der
 - Vorlagen: Meteocontrol blue'Log RPC (Steuer-Register 5000/5002–5006/5008
   verwaltet das Modul INTERN, nicht in der Registertabelle), SunSpec WR
   dreiphasig (Model 1+113), SunSpec Zähler dreiphasig (Model 1+213).
-- Schreiben: `RequestAction` wenn die Zielvariable eine Aktion hat, sonst
-  `SetValue`.
+- Schreiben je Registerzeile (Spalte "Schreiben"): 0 = nur lesen, 1 =
+  `RequestAction` wenn die Zielvariable eine Aktion hat (sonst `SetValue`),
+  2 = immer `SetValue` (Aktion bewusst umgehen - nötig für Variablen fremder
+  Instanzen, z. B. ModBus-Device-Register beim Ersatz eines alten Slaves).
 
 ## Tests
 
