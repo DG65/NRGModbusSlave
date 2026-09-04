@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.2 (2026-09-04)
+
+- Verbesserung: Ein geöffnetes Konfigurationsformular aktualisiert die Spalten "Empfangen"/"Abgefragt" sowie die Verbindungs-Kopfzeile jetzt live bei jedem eingehenden Modbus-Zugriff, statt nur beim manuellen Neuladen der Seite
+
 ## 1.7.1 (2026-09-04)
 
 - Neu: Registertabelle zeigt je Zeile zwei zusätzliche Spalten "Empfangen" (zuletzt von einem Master geschrieben) und "Abgefragt" (zuletzt von einem Master gelesen) - macht sichtbar, ob und wann tatsächlich Datenverkehr auf einem konkreten Register ankommt, statt nur die eine globale Variable "Letzte Modbus-Anfrage" zu haben. Neue öffentliche Funktion `MBSLV_GetRegisterActivity()` liefert dieselben Zeiten als JSON für eigene Skripte. Zugriffe eines Empfangs-Batches werden gesammelt und in einem Schreibzugriff persistiert (keine zusätzliche Last je Einzelregister)

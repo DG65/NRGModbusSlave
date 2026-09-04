@@ -1,7 +1,7 @@
 # NRG-Stack ModbusSlave
 
 ![Symcon](https://img.shields.io/badge/Symcon-PHPModul-blue)
-![Modul Version](https://img.shields.io/badge/Modul_Version-1.7.1-blue)
+![Modul Version](https://img.shields.io/badge/Modul_Version-1.7.2-blue)
 ![Symcon Version](https://img.shields.io/badge/Symcon_Version-7.0%2B-blue)
 ![License](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-lightgrey)
 [![Check Style](https://github.com/DG65/NRGModbusSlave/actions/workflows/check-style.yml/badge.svg)](https://github.com/DG65/NRGModbusSlave/actions/workflows/check-style.yml)
@@ -66,7 +66,9 @@ int32-Darstellung parallel).
 Uhrzeit oder „–", wenn seit dem letzten Neustart noch kein Zugriff stattfand. Damit ist pro
 Register sichtbar, ob und wann tatsächlich Datenverkehr ankommt, statt nur die eine globale
 Variable „Letzte Modbus-Anfrage" zu haben. Für eigene Skripte liefert `MBSLV_GetRegisterActivity`
-dieselben Zeiten als JSON (`{"5000":{"w":1735900000,"r":1735899990}}`).
+dieselben Zeiten als JSON (`{"5000":{"w":1735900000,"r":1735899990}}`). Ist die Instanzkonfiguration
+im Browser geöffnet, aktualisieren sich diese Spalten und die Verbindungs-Kopfzeile live bei jedem
+Zugriff, ein manuelles Neuladen der Seite ist nicht nötig.
 
 ### Bestehenden Modbus-Slave ersetzen (Simulator, SPS)
 
