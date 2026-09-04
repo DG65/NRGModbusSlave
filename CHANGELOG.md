@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.3 (2026-09-04)
+
+- Fix: Live-Aktualisierung aus 1.7.2 wieder entfernt - `UpdateFormField` auf die Registertabelle (ein speicherbares Listenfeld) hat ein offenes Formular bei jedem Modbus-Zugriff als "geändert" markiert und ständig "Änderungen übernehmen" verlangt, obwohl der Nutzer nichts geändert hatte. Auf einer Live-Instanz mit häufigem Verkehr praktisch unbenutzbar. "Empfangen"/"Abgefragt" aktualisieren sich wie in 1.7.1 beim (erneuten) Öffnen des Formulars, kein automatisches Live-Update
+
 ## 1.7.2 (2026-09-04)
 
 - Verbesserung: Ein geöffnetes Konfigurationsformular aktualisiert die Spalten "Empfangen"/"Abgefragt" sowie die Verbindungs-Kopfzeile jetzt live bei jedem eingehenden Modbus-Zugriff, statt nur beim manuellen Neuladen der Seite

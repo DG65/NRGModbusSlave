@@ -553,14 +553,6 @@ class ModbusTCPSlave extends IPSModule
         }
         $this->WriteAttributeString('RegisterActivity', json_encode($activity));
         $this->pendingActivity = [];
-
-        // Ein ggf. geöffnetes Konfigurationsformular live nachziehen (funktioniert
-        // laut Doku aus beliebigen Modul-Methoden heraus, nicht nur onClick/onChange
-        // - ein bekannter Stolperstein betrifft nur den Aufruf aus ApplyChanges(),
-        // wo das Formular-Neuladen nach dem Speichern die Aktualisierung überholt;
-        // das betrifft ReceiveData() nicht). Wirkungslos, falls kein Formular offen ist.
-        $this->UpdateFormField('Registers', 'values', json_encode($this->registersForForm()));
-        $this->UpdateFormField('PortInfo', 'caption', $this->portInfoCaption());
     }
 
     /** Formatierte Zugriffszeiten (HH:MM:SS bzw. "–") einer Registeradresse fuer die Formularanzeige */
