@@ -238,10 +238,6 @@ class MBSLVModbusServer
             }
             $done[$ri] = true;
             $row = $this->rows[$ri];
-            if (empty($row['Writable'])) {
-                ($this->logger)('Schreiben', sprintf('Register %d ist nicht beschreibbar - Wert verworfen', $addr));
-                continue;
-            }
             $base = (int) $row['Address'];
             $n = self::wordCount((string) $row['DataType']);
             if ($base < $start || $base + $n > $start + $count) {
@@ -249,6 +245,10 @@ class MBSLVModbusServer
                 continue;
             }
             $value = self::wordsToValue(array_slice($words, $base - $start, $n), (string) $row['DataType'], $this->swapWords);
+            if (empty($row['Writable'])) {
+                ($this->logger)('Schreiben', sprintf('Register %d ist nicht beschreibbar - Wert %s verworfen', $addr, $value));
+                continue;
+            }
             ($this->writer)($row, $value);
         }
     }

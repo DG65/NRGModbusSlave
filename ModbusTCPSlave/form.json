@@ -155,6 +155,12 @@
           "edit": { "type": "SelectVariable" }
         },
         {
+          "caption": "Wert",
+          "name": "CurrentValue",
+          "width": "90px",
+          "add": "–"
+        },
+        {
           "caption": "Faktor",
           "name": "Factor",
           "width": "80px",

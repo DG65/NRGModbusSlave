@@ -285,6 +285,12 @@ class ModbusTCPSlave extends IPSModule
         foreach ($rows as &$row) {
             $row['Writable'] = self::normalizeWriteMode($row['Writable'] ?? 0);
             $row = array_merge($row, $this->registerActivityLabels($activity, (int) ($row['Address'] ?? 0)));
+            $factor = (float) ($row['Factor'] ?? 1.0);
+            $row['CurrentValue'] = $this->formatCurrentValue($this->currentRegisterValue([
+                'VariableID' => (int) ($row['VariableID'] ?? 0),
+                'Factor'     => $factor == 0.0 ? 1.0 : $factor,
+                'Fixed'      => (float) ($row['Fixed'] ?? 0.0)
+            ]));
         }
         unset($row);
         return $rows;
@@ -564,6 +570,13 @@ class ModbusTCPSlave extends IPSModule
             'LastWritten' => $format($entry['w'] ?? 0),
             'LastRead'    => $format($entry['r'] ?? 0)
         ];
+    }
+
+    /** Kompakte Anzeige eines Registerwerts (Formular-Spalte "Wert") */
+    private function formatCurrentValue(float $value): string
+    {
+        $rounded = round($value, 4);
+        return rtrim(rtrim(sprintf('%.4f', $rounded), '0'), '.') ?: '0';
     }
 
     /** Eingehende gültige Modbus-Frames als Lebenszeichen verbuchen */
@@ -859,6 +872,16 @@ class ModbusTCPSlave extends IPSModule
     private function readRegisterValue(array $row): float
     {
         $this->noteRegisterActivity((int) ($row['Address'] ?? 0), 'r');
+        return $this->currentRegisterValue($row);
+    }
+
+    /**
+     * Aktueller Wert eines Registers OHNE Zugriffszeit zu vermerken - für die
+     * reine Anzeige (Formular-Spalte "Wert"), damit das Betrachten des
+     * Formulars nicht selbst als "von einem Master abgefragt" gezählt wird.
+     */
+    private function currentRegisterValue(array $row): float
+    {
         if (isset($row['Ident'])) {
             switch ($row['Ident']) {
                 case 'RPC_SETPOINT':

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.4 (2026-09-04)
+
+- Neu: Registertabelle zeigt eine Spalte "Wert" mit dem aktuellen Registerinhalt (skaliert, wie über Modbus übertragen) - reine Anzeige, aktualisiert sich wie "Empfangen"/"Abgefragt" beim Öffnen des Formulars, löst dafür keine eigene Zugriffszeit aus
+- Verbesserung: Lehnt das Modul einen Schreibversuch ab (z. B. nicht beschreibbares Register), steht der abgelehnte Wert jetzt mit im Debug-Log statt nur "Wert verworfen"
+
 ## 1.7.3 (2026-09-04)
 
 - Fix: Live-Aktualisierung aus 1.7.2 wieder entfernt - `UpdateFormField` auf die Registertabelle (ein speicherbares Listenfeld) hat ein offenes Formular bei jedem Modbus-Zugriff als "geändert" markiert und ständig "Änderungen übernehmen" verlangt, obwohl der Nutzer nichts geändert hatte. Auf einer Live-Instanz mit häufigem Verkehr praktisch unbenutzbar. "Empfangen"/"Abgefragt" aktualisieren sich wie in 1.7.1 beim (erneuten) Öffnen des Formulars, kein automatisches Live-Update

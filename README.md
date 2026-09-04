@@ -1,7 +1,7 @@
 # NRG-Stack ModbusSlave
 
 ![Symcon](https://img.shields.io/badge/Symcon-PHPModul-blue)
-![Modul Version](https://img.shields.io/badge/Modul_Version-1.7.3-blue)
+![Modul Version](https://img.shields.io/badge/Modul_Version-1.7.4-blue)
 ![Symcon Version](https://img.shields.io/badge/Symcon_Version-7.0%2B-blue)
 ![License](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-lightgrey)
 [![Check Style](https://github.com/DG65/NRGModbusSlave/actions/workflows/check-style.yml/badge.svg)](https://github.com/DG65/NRGModbusSlave/actions/workflows/check-style.yml)
@@ -49,9 +49,9 @@ Port entsteht eine Kopie samt Server Socket.
 Die Word-Reihenfolge bei Mehrwort-Typen ist umschaltbar (ABCD/CDAB).
 
 **Registertabelle:** Pro Zeile Adresse (0-basiert), Bereich (Holding/Input), Datentyp,
-IPS-Variable, Skalierungsfaktor, optionaler Festwert (wenn keine Variable zugeordnet ist) und
-Schreibmodus. Dieselbe Variable darf mehrfach gemappt werden (z. B. float32- und
-int32-Darstellung parallel).
+IPS-Variable, aktueller Wert (nur Anzeige, siehe unten), Skalierungsfaktor, optionaler Festwert
+(wenn keine Variable zugeordnet ist) und Schreibmodus. Dieselbe Variable darf mehrfach gemappt
+werden (z. B. float32- und int32-Darstellung parallel).
 
 **Schreibmodus (Spalte „Schreiben"):**
 
@@ -66,11 +66,13 @@ int32-Darstellung parallel).
 Uhrzeit oder „–", wenn seit dem letzten Neustart noch kein Zugriff stattfand. Damit ist pro
 Register sichtbar, ob und wann tatsächlich Datenverkehr ankommt, statt nur die eine globale
 Variable „Letzte Modbus-Anfrage" zu haben. Für eigene Skripte liefert `MBSLV_GetRegisterActivity`
-dieselben Zeiten als JSON (`{"5000":{"w":1735900000,"r":1735899990}}`). Die Spalten aktualisieren
-sich beim (erneuten) Öffnen der Instanzkonfiguration - ein offenes Formular automatisch
-nachzuziehen ist bewusst nicht umgesetzt, weil die Registertabelle ein speicherbares Listenfeld
-ist und `UpdateFormField` darauf die Konsole zu "Änderungen übernehmen" auffordert, obwohl nichts
-geändert wurde.
+dieselben Zeiten als JSON (`{"5000":{"w":1735900000,"r":1735899990}}`). Die Spalte „Wert" zeigt
+zusätzlich den aktuellen Registerinhalt (skaliert, wie über Modbus übertragen). Alle drei Spalten
+aktualisieren sich beim (erneuten) Öffnen der Instanzkonfiguration - ein offenes Formular
+automatisch nachzuziehen ist bewusst nicht umgesetzt, weil die Registertabelle ein speicherbares
+Listenfeld ist und `UpdateFormField` darauf die Konsole zu "Änderungen übernehmen" auffordert,
+obwohl nichts geändert wurde. Lehnt das Modul einen Schreibversuch ab (z. B. weil ein Register
+nicht beschreibbar ist), steht der abgelehnte Wert im Debug-Log.
 
 ### Bestehenden Modbus-Slave ersetzen (Simulator, SPS)
 
