@@ -1,7 +1,7 @@
 # NRG-Stack ModbusSlave
 
 ![Symcon](https://img.shields.io/badge/Symcon-PHPModul-blue)
-![Modul Version](https://img.shields.io/badge/Modul_Version-1.7.0-blue)
+![Modul Version](https://img.shields.io/badge/Modul_Version-1.7.1-blue)
 ![Symcon Version](https://img.shields.io/badge/Symcon_Version-7.0%2B-blue)
 ![License](https://img.shields.io/badge/License-PolyForm_Noncommercial_1.0.0-lightgrey)
 [![Check Style](https://github.com/DG65/NRGModbusSlave/actions/workflows/check-style.yml/badge.svg)](https://github.com/DG65/NRGModbusSlave/actions/workflows/check-style.yml)
@@ -60,6 +60,13 @@ int32-Darstellung parallel).
 | Nein | Master darf nur lesen; Schreibversuche werden quittiert, aber verworfen |
 | Ja – Aktion | `RequestAction`, falls die Variable eine Aktion besitzt (z. B. um einen Aktor zu schalten), sonst `SetValue` |
 | Ja – direkt | immer `SetValue`; die Aktion der Variable wird bewusst nicht ausgelöst – nötig für Variablen fremder Instanzen (z. B. ModBus-Device-Register), deren Aktion sonst in ein anderes Gerät schreiben würde |
+
+**Zugriffszeiten je Register:** Die Registertabelle zeigt zusätzlich zwei Spalten „Empfangen"
+(zuletzt von einem Master GESCHRIEBEN) und „Abgefragt" (zuletzt von einem Master GELESEN) –
+Uhrzeit oder „–", wenn seit dem letzten Neustart noch kein Zugriff stattfand. Damit ist pro
+Register sichtbar, ob und wann tatsächlich Datenverkehr ankommt, statt nur die eine globale
+Variable „Letzte Modbus-Anfrage" zu haben. Für eigene Skripte liefert `MBSLV_GetRegisterActivity`
+dieselben Zeiten als JSON (`{"5000":{"w":1735900000,"r":1735899990}}`).
 
 ### Bestehenden Modbus-Slave ersetzen (Simulator, SPS)
 

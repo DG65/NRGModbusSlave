@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.1 (2026-09-04)
+
+- Neu: Registertabelle zeigt je Zeile zwei zusätzliche Spalten "Empfangen" (zuletzt von einem Master geschrieben) und "Abgefragt" (zuletzt von einem Master gelesen) - macht sichtbar, ob und wann tatsächlich Datenverkehr auf einem konkreten Register ankommt, statt nur die eine globale Variable "Letzte Modbus-Anfrage" zu haben. Neue öffentliche Funktion `MBSLV_GetRegisterActivity()` liefert dieselben Zeiten als JSON für eigene Skripte. Zugriffe eines Empfangs-Batches werden gesammelt und in einem Schreibzugriff persistiert (keine zusätzliche Last je Einzelregister)
+
 ## 1.7.0 (2026-09-03)
 
 - Neu: dreistufiger Schreibmodus je Registerzeile (Spalte "Schreiben": Nein / Ja - Aktion / Ja - direkt). "Direkt" schreibt immer per SetValue und umgeht die Aktion der Variable - nötig, wenn die verknüpfte Variable einer anderen Instanz gehört (typisch: Register eines ModBus-Device beim Ersatz eines bisherigen Slaves), deren Aktion sonst versuchen würde, den Wert in ein fremdes Gerät zu schreiben. Bestehende Konfigurationen (true/false) werden automatisch als Ja-Aktion/Nein gelesen

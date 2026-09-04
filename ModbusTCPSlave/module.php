@@ -43,6 +43,11 @@ class ModbusTCPSlave extends IPSModule
     private const WRITE_ACTION = 1; // RequestAction, falls die Variable eine Aktion hat, sonst SetValue
     private const WRITE_DIRECT = 2; // immer SetValue, Aktion der Variable bewusst nicht auslösen
 
+    // innerhalb EINER ReceiveData()-Verarbeitung gesammelte Registerzugriffe,
+    // am Ende gebuendelt in die RegisterActivity-Attribut-Variable geschrieben
+    // (ein Schreibzugriff je Empfangs-Batch statt je einzelnem Register)
+    private array $pendingActivity = [];
+
     public function Create()
     {
         //Never delete this line!
@@ -78,6 +83,10 @@ class ModbusTCPSlave extends IPSModule
         // REL in UNSERE Slave-Emulation schreiben könnte (offen, siehe Memory).
         $this->RegisterAttributeFloat('WatchdogValue', 0.0);
         $this->RegisterAttributeString('ScratchValues', '{}');
+        // Letzte Zugriffszeit je Registeradresse (r=gelesen/abgefragt,
+        // w=geschrieben/empfangen) - Sichtbarkeit "was geht wirklich" in der
+        // Registertabelle, unabhaengig von der einen globalen LastRequest-Variable
+        $this->RegisterAttributeString('RegisterActivity', '{}');
 
         $this->RegisterTimer('Expire', 0, 'MBSLV_CheckExpire($_IPS[\'TARGET\']);');
         $this->RegisterTimer('Watch', 0, 'MBSLV_Watch($_IPS[\'TARGET\']);');
@@ -184,6 +193,7 @@ class ModbusTCPSlave extends IPSModule
                 'Type'       => 0
             ]));
         }
+        $this->flushRegisterActivity();
         return '';
     }
 
@@ -193,6 +203,18 @@ class ModbusTCPSlave extends IPSModule
     public function Watch(): void
     {
         $this->UpdateHealth();
+    }
+
+    /**
+     * Letzte Zugriffszeitpunkte je Registeradresse als JSON, z. B. für eigene
+     * Skripte/EMS-Integration: {"5000":{"w":1735900000,"r":1735899990}} -
+     * "w" = zuletzt von einem Master GESCHRIEBEN (Wert kam rein), "r" = zuletzt
+     * von einem Master GELESEN (Wert wurde abgefragt). Dieselben Zeiten stehen
+     * auch als Spalten "Empfangen"/"Abgefragt" in der Registertabelle im Formular.
+     */
+    public function GetRegisterActivity(): string
+    {
+        return $this->ReadAttributeString('RegisterActivity');
     }
 
     /**
@@ -244,15 +266,25 @@ class ModbusTCPSlave extends IPSModule
         return json_encode($form);
     }
 
-    /** Gespeicherte Registerzeilen mit normalisierter Spalte "Writable" (0/1/2) */
+    /**
+     * Gespeicherte Registerzeilen mit normalisierter Spalte "Writable" (0/1/2)
+     * sowie den zuletzt beobachteten Zugriffszeiten je Register (Spalten
+     * "Empfangen"/"Abgefragt") - rein zur Anzeige, nicht Teil der gespeicherten
+     * Konfiguration (buildServer() liest nur die bekannten Registerfelder).
+     */
     private function registersForForm(): array
     {
         $rows = json_decode($this->ReadPropertyString('Registers'), true);
         if (!is_array($rows)) {
             return [];
         }
+        $activity = json_decode($this->ReadAttributeString('RegisterActivity'), true);
+        if (!is_array($activity)) {
+            $activity = [];
+        }
         foreach ($rows as &$row) {
             $row['Writable'] = self::normalizeWriteMode($row['Writable'] ?? 0);
+            $row = array_merge($row, $this->registerActivityLabels($activity, (int) ($row['Address'] ?? 0)));
         }
         unset($row);
         return $rows;
@@ -492,6 +524,47 @@ class ModbusTCPSlave extends IPSModule
     // ---------------------------------------------------------------------
     // interner Teil
     // ---------------------------------------------------------------------
+
+    /** Registerzugriff fuer die spaetere Sammel-Persistierung vormerken */
+    private function noteRegisterActivity(int $address, string $kind): void
+    {
+        $this->pendingActivity[$address][$kind] = time();
+    }
+
+    /**
+     * Sammelt die in einem ReceiveData()-Aufruf vorgemerkten Registerzugriffe
+     * in EINEM Schreibzugriff auf die Attribut-Variable (statt je Register).
+     */
+    private function flushRegisterActivity(): void
+    {
+        if ($this->pendingActivity === []) {
+            return;
+        }
+        $activity = json_decode($this->ReadAttributeString('RegisterActivity'), true);
+        if (!is_array($activity)) {
+            $activity = [];
+        }
+        foreach ($this->pendingActivity as $address => $kinds) {
+            $entry = $activity[(string) $address] ?? [];
+            foreach ($kinds as $kind => $ts) {
+                $entry[$kind] = $ts;
+            }
+            $activity[(string) $address] = $entry;
+        }
+        $this->WriteAttributeString('RegisterActivity', json_encode($activity));
+        $this->pendingActivity = [];
+    }
+
+    /** Formatierte Zugriffszeiten (HH:MM:SS bzw. "–") einer Registeradresse fuer die Formularanzeige */
+    private function registerActivityLabels(array $activity, int $address): array
+    {
+        $entry = $activity[(string) $address] ?? [];
+        $format = fn ($ts): string => $ts > 0 ? date('H:i:s', (int) $ts) : '–';
+        return [
+            'LastWritten' => $format($entry['w'] ?? 0),
+            'LastRead'    => $format($entry['r'] ?? 0)
+        ];
+    }
 
     /** Eingehende gültige Modbus-Frames als Lebenszeichen verbuchen */
     private function noteRequest(): void
@@ -785,6 +858,7 @@ class ModbusTCPSlave extends IPSModule
 
     private function readRegisterValue(array $row): float
     {
+        $this->noteRegisterActivity((int) ($row['Address'] ?? 0), 'r');
         if (isset($row['Ident'])) {
             switch ($row['Ident']) {
                 case 'RPC_SETPOINT':
@@ -812,6 +886,7 @@ class ModbusTCPSlave extends IPSModule
 
     private function writeRegisterValue(array $row, float $value): void
     {
+        $this->noteRegisterActivity((int) ($row['Address'] ?? 0), 'w');
         if (isset($row['Ident'])) {
             $this->rpcWrite($row['Ident'], $value);
             return;

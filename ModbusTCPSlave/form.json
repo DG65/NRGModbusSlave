@@ -181,6 +181,18 @@
               { "caption": "Ja - direkt (SetValue)", "value": 2 }
             ]
           }
+        },
+        {
+          "caption": "Empfangen",
+          "name": "LastWritten",
+          "width": "100px",
+          "add": "–"
+        },
+        {
+          "caption": "Abgefragt",
+          "name": "LastRead",
+          "width": "100px",
+          "add": "–"
         }
       ]
     },
